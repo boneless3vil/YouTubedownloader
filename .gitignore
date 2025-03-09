@@ -43,8 +43,6 @@ ENV/
 *.bak
 *.cache
 .cache/
-build/
-dist/
 
 # Test coverage
 htmlcov/
@@ -74,3 +72,7 @@ YouTubeDownloader.spec
 base_library.zip
 warn-*.txt
 xref-*.html
+
+# Temporary and system files
+.DS_Store
+Thumbs.db

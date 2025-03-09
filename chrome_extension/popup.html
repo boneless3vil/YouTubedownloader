@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>YouTube Video Downloader</title>
+  <style>
+    body {
+      width: 300px;
+      padding: 10px;
+      font-family: Arial, sans-serif;
+    }
+    .option {
+      margin: 10px 0;
+    }
+    select, button {
+      width: 100%;
+      padding: 5px;
+      margin: 5px 0;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <h2>YouTube Video Downloader</h2>
+  <div class="option">
+    <label for="quality">Video Quality:</label>
+    <select id="quality">
+      <option value="highest">Highest Available</option>
+      <option value="1080p">1080p</option>
+      <option value="720p">720p</option>
+      <option value="480p">480p</option>
+      <option value="360p">360p</option>
+    </select>
+  </div>
+  <div class="option">
+    <label for="format">Format:</label>
+    <select id="format">
+      <option value="mp4">MP4</option>
+      <option value="webm">WebM</option>
+    </select>
+  </div>
+  <button id="downloadBtn">Download Current Video</button>
+  <script src="popup.js"></script>
+</body>
+</html>
