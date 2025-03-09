@@ -1,0 +1,60 @@
+# Ignore Python virtual environments and dependencies
+.pythonlibs/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+dist/
+build/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Build and distribution
+*.spec
+*.exe
+*.log
+
+# Chrome Extension packaging
+chrome_extension/*.zip
+chrome_extension/*.crx
+chrome_extension/*.pem
+
+# Temporary files
+*.tmp
+*.bak
+*.cache
+.cache/
+
+# Test coverage
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+
+# Local development
+*.local
+.replit
+.upm/
+.config/
+
+# Replit specific
+.local/
+.breakpoints
+replit.nix
+poetry.lock
+
+# Python package files
+*.egg-info/
+*.egg
