@@ -1,0 +1,74 @@
+modules = ["python-3.11"]
+
+[nix]
+channel = "stable-24_05"
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Build Test"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Python YouTube Downloader"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "YouTube Downloader Server"
+
+[[workflows.workflow]]
+name = "Build Test"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd python_youtube_downloader && python build.py"
+
+[[workflows.workflow]]
+name = "Python YouTube Downloader"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd python_youtube_downloader && python youtube_downloader.py"
+
+[[workflows.workflow]]
+name = "YouTube Downloader Server"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd python_youtube_downloader && python youtube_downloader.py"
+waitForPort = 5000
+
+[deployment]
+run = ["sh", "-c", "cd python_youtube_downloader && python youtube_downloader.py"]
+
+[[ports]]
+localPort = 5000
+externalPort = 80

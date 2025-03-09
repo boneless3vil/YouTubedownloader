@@ -1,0 +1,199 @@
+⎯○○○⎯  18:04:21   JonathanBaldwin     C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader [master ↓6 ↑2 +0 ~0 -739 | +22 ~0 -0 !] ⎯○○○╮
+╰○○○⎯  pip install yt-dlp pyperclip pyinstaller
+Requirement already satisfied: yt-dlp in c:\users\jonathanbaldwin\onedrive - sinoverpi\documents\03_computer\python\youtubedownloader\yt-venv\lib\site-packages (2025.2.19)
+Requirement already satisfied: pyperclip in c:\users\jonathanbaldwin\onedrive - sinoverpi\documents\03_computer\python\youtubedownloader\yt-venv\lib\site-packages (1.9.0)
+Collecting pyinstaller
+  Downloading pyinstaller-6.12.0-py3-none-win_amd64.whl.metadata (8.3 kB)
+Collecting setuptools>=42.0.0 (from pyinstaller)
+  Using cached setuptools-75.8.2-py3-none-any.whl.metadata (6.7 kB)
+Collecting altgraph (from pyinstaller)
+  Downloading altgraph-0.17.4-py2.py3-none-any.whl.metadata (7.3 kB)
+Collecting pyinstaller-hooks-contrib>=2025.1 (from pyinstaller)
+  Downloading pyinstaller_hooks_contrib-2025.1-py3-none-any.whl.metadata (16 kB)
+Collecting packaging>=22.0 (from pyinstaller)
+  Using cached packaging-24.2-py3-none-any.whl.metadata (3.2 kB)
+Collecting pefile!=2024.8.26,>=2022.5.30 (from pyinstaller)
+  Downloading pefile-2023.2.7-py3-none-any.whl.metadata (1.4 kB)
+Collecting pywin32-ctypes>=0.2.1 (from pyinstaller)
+  Downloading pywin32_ctypes-0.2.3-py3-none-any.whl.metadata (3.9 kB)
+Downloading pyinstaller-6.12.0-py3-none-win_amd64.whl (1.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.3/1.3 MB 13.9 MB/s eta 0:00:00
+Using cached packaging-24.2-py3-none-any.whl (65 kB)
+Downloading pefile-2023.2.7-py3-none-any.whl (71 kB)
+Downloading pyinstaller_hooks_contrib-2025.1-py3-none-any.whl (346 kB)
+Downloading pywin32_ctypes-0.2.3-py3-none-any.whl (30 kB)
+Using cached setuptools-75.8.2-py3-none-any.whl (1.2 MB)
+Downloading altgraph-0.17.4-py2.py3-none-any.whl (21 kB)
+Installing collected packages: altgraph, setuptools, pywin32-ctypes, pefile, packaging, pyinstaller-hooks-contrib, pyinstaller
+Successfully installed altgraph-0.17.4 packaging-24.2 pefile-2023.2.7 pyinstaller-6.12.0 pyinstaller-hooks-contrib-2025.1 pywin32-ctypes-0.2.3 setuptools-75.8.2
+(yt-venv)
+⎯○○○⎯  18:04:56   JonathanBaldwin     C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader [master ↓6 ↑2 +0 ~0 -739 | +22 ~0 -0 !] ⎯○○○╮
+╰○○○⎯  python build.py
+Warning: Could not create icon file
+91 DEPRECATION: Running PyInstaller as admin is not necessary nor sensible. Run PyInstaller from a non-administrator terminal. PyInstaller 7.0 will block this.
+251 INFO: PyInstaller: 6.12.0, contrib hooks: 2025.1
+251 INFO: Python: 3.12.9
+325 INFO: Platform: Windows-11-10.0.26100-SP0
+325 INFO: Python environment: C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\yt-venv
+326 INFO: wrote C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\YouTubeDownloader.spec
+331 INFO: Removing temporary files and cleaning cache in C:\Users\JonathanBaldwin\AppData\Local\pyinstaller
+3290 INFO: Module search paths (PYTHONPATH):
+['C:\\Users\\JonathanBaldwin\\OneDrive - '
+ 'sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader',
+ 'C:\\Program Files\\Python312\\python312.zip',
+ 'C:\\Program Files\\Python312\\DLLs',
+ 'C:\\Program Files\\Python312\\Lib',
+ 'C:\\Program Files\\Python312',
+ 'C:\\Users\\JonathanBaldwin\\OneDrive - '
+ 'sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv',
+ 'C:\\Users\\JonathanBaldwin\\OneDrive - '
+ 'sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages',
+ 'C:\\Users\\JonathanBaldwin\\OneDrive - '
+ 'sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\setuptools\\_vendor',
+ 'C:\\Users\\JonathanBaldwin\\OneDrive - '
+ 'sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader']
+3901 INFO: Appending 'datas' from .spec
+3991 INFO: checking Analysis
+3992 INFO: Building Analysis because Analysis-00.toc is non existent
+3992 INFO: Running Analysis Analysis-00.toc
+3992 INFO: Target bytecode optimization level: 0
+3992 INFO: Initializing module dependency graph...
+3993 INFO: Initializing module graph hook caches...
+4026 INFO: Analyzing modules for base_library.zip ...
+5603 INFO: Processing standard module hook 'hook-heapq.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+5754 INFO: Processing standard module hook 'hook-encodings.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+8165 INFO: Processing standard module hook 'hook-pickle.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+12320 INFO: Caching module dependency graph...
+12347 INFO: Looking for Python shared library...
+12353 INFO: Using Python shared library: C:\Program Files\Python312\python312.dll
+12353 INFO: Analyzing C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\youtube_downloader.py
+12363 INFO: Processing pre-find-module-path hook 'hook-tkinter.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_find_module_path'
+12365 INFO: TclTkInfo: initializing cached Tcl/Tk info...
+12846 INFO: Processing standard module hook 'hook-_tkinter.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+13039 INFO: Processing standard module hook 'hook-yt_dlp.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\yt_dlp\\__pyinstaller'
+Adding imports: ['yt_dlp.compat._legacy', 'yt_dlp.compat._deprecated', 'yt_dlp.utils._legacy', 'yt_dlp.utils._deprecated', 'Cryptodome', 'mutagen', 'brotli', 'certifi', 'secretstorage', 'curl_cffi']
+13182 WARNING: collect_data_files - skipping data collection for module 'curl_cffi' as it is not a package.
+13940 INFO: Processing standard module hook 'hook-xml.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+14035 INFO: Processing standard module hook 'hook-xml.etree.cElementTree.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+14635 INFO: Processing standard module hook 'hook-platform.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+14699 INFO: Processing standard module hook 'hook-sqlite3.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+15849 INFO: Processing standard module hook 'hook-multiprocessing.util.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+44939 INFO: Analyzing hidden import 'yt_dlp.__main__'
+44952 INFO: Analyzing hidden import 'yt_dlp.__pyinstaller'
+44963 INFO: Analyzing hidden import 'yt_dlp.__pyinstaller.hook-yt_dlp'
+45189 INFO: Processing standard module hook 'hook-sysconfig.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+45382 INFO: Processing pre-safe-import-module hook 'hook-importlib_metadata.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+45383 INFO: SetuptoolsInfo: initializing cached setuptools info...
+48055 INFO: Setuptools: 'importlib_metadata' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.importlib_metadata'!
+48060 INFO: Processing standard module hook 'hook-setuptools.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+48069 INFO: Processing pre-safe-import-module hook 'hook-distutils.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+48105 INFO: Processing pre-safe-import-module hook 'hook-jaraco.functools.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+48106 INFO: Setuptools: 'jaraco.functools' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.jaraco.functools'!
+48113 INFO: Processing pre-safe-import-module hook 'hook-more_itertools.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+48113 INFO: Setuptools: 'more_itertools' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.more_itertools'!
+48196 INFO: Processing pre-safe-import-module hook 'hook-packaging.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+48209 INFO: Processing standard module hook 'hook-packaging.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+48275 INFO: Processing pre-safe-import-module hook 'hook-jaraco.text.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+48276 INFO: Setuptools: 'jaraco.text' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.jaraco.text'!
+48281 INFO: Processing standard module hook 'hook-setuptools._vendor.jaraco.text.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+48282 INFO: Processing pre-safe-import-module hook 'hook-importlib_resources.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+48283 INFO: Processing pre-safe-import-module hook 'hook-jaraco.context.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+48284 INFO: Setuptools: 'jaraco.context' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.jaraco.context'!
+48289 INFO: Processing pre-safe-import-module hook 'hook-backports.tarfile.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+48289 INFO: Setuptools: 'backports.tarfile' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.backports.tarfile'!
+48339 INFO: Processing standard module hook 'hook-backports.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+48340 INFO: Processing pre-safe-import-module hook 'hook-typing_extensions.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+48683 INFO: Processing pre-safe-import-module hook 'hook-tomli.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+48685 INFO: Setuptools: 'tomli' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.tomli'!
+48969 INFO: Processing standard module hook 'hook-pkg_resources.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+49403 INFO: Processing pre-safe-import-module hook 'hook-platformdirs.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+49405 INFO: Setuptools: 'platformdirs' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.platformdirs'!
+49527 INFO: Processing pre-safe-import-module hook 'hook-wheel.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+49528 INFO: Setuptools: 'wheel' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.wheel'!
+49685 INFO: Processing standard module hook 'hook-setuptools._vendor.importlib_metadata.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+49687 INFO: Processing pre-safe-import-module hook 'hook-zipp.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+49688 INFO: Setuptools: 'zipp' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.zipp'!
+49719 INFO: Processing standard module hook 'hook-win32ctypes.core.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+50552 INFO: Analyzing hidden import 'yt_dlp.compat._deprecated'
+50568 INFO: Analyzing hidden import 'yt_dlp.compat._legacy'
+50615 INFO: Analyzing hidden import 'yt_dlp.utils._deprecated'
+50640 INFO: Analyzing hidden import 'yt_dlp.utils._legacy'
+50668 INFO: Analyzing hidden import 'pyperclip.__main__'
+50690 INFO: Processing module hooks (post-graph stage)...
+50908 INFO: Processing standard module hook 'hook-difflib.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+51440 INFO: Processing standard module hook 'hook-_tkinter.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+51462 INFO: Performing binary vs. data reclassification (2041 entries)
+61466 INFO: Looking for ctypes DLLs
+61545 INFO: Analyzing run-time hooks ...
+61546 INFO: Including custom run-time hook 'runtime-hook.py'
+61565 INFO: Including run-time hook 'pyi_rth_inspect.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+61568 INFO: Including run-time hook 'pyi_rth_pkgutil.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+61570 INFO: Including run-time hook 'pyi_rth_multiprocessing.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+61571 INFO: Including run-time hook 'pyi_rth_pkgres.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+61573 INFO: Including run-time hook 'pyi_rth_setuptools.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+61574 INFO: Including run-time hook 'pyi_rth__tkinter.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+61616 INFO: Creating base_library.zip...
+61663 INFO: Looking for dynamic libraries
+62358 INFO: Extra DLL search directories (AddDllDirectory): []
+62358 INFO: Extra DLL search directories (PATH): []
+62657 INFO: Warnings written to C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\build\YouTubeDownloader\warn-YouTubeDownloader.txt
+62739 INFO: Graph cross-reference written to C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\build\YouTubeDownloader\xref-YouTubeDownloader.html
+62817 INFO: checking PYZ
+62818 INFO: Building PYZ because PYZ-00.toc is non existent
+62818 INFO: Building PYZ (ZlibArchive) C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\build\YouTubeDownloader\PYZ-00.pyz
+63858 INFO: Building PYZ (ZlibArchive) C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\build\YouTubeDownloader\PYZ-00.pyz completed successfully.
+63927 INFO: checking PKG
+63927 INFO: Building PKG because PKG-00.toc is non existent
+63927 INFO: Building PKG (CArchive) YouTubeDownloader.pkg
+67213 INFO: Building PKG (CArchive) YouTubeDownloader.pkg completed successfully.
+67238 INFO: Bootloader C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\yt-venv\Lib\site-packages\PyInstaller\bootloader\Windows-64bit-intel\runw.exe
+67239 INFO: checking EXE
+67239 INFO: Building EXE because EXE-00.toc is non existent
+67239 INFO: Building EXE from EXE-00.toc
+67239 INFO: Copying bootloader EXE to C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\dist\YouTubeDownloader.exe
+68016 INFO: Copying icon to EXE
+68626 INFO: Copying version information to EXE
+69160 INFO: Copying 0 resources to EXE
+69160 INFO: Embedding manifest in EXE
+75149 INFO: Appending PKG archive to EXE
+101999 INFO: Fixing EXE headers
+Traceback (most recent call last):
+  File "C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\yt-venv\Lib\site-packages\PyInstaller\utils\win32\winutils.py", line 94, in update_exe_pe_checksum
+    checksum = compute_exe_pe_checksum(exe_path)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\yt-venv\Lib\site-packages\PyInstaller\utils\win32\winutils.py", line 202, in compute_exe_pe_checksum
+    raise RuntimeError(f"Failed to open file {exe_path}! Error code: {err}")
+RuntimeError: Failed to open file C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\dist\YouTubeDownloader.exe! Error code: 225
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\build.py", line 109, in <module>
+    build_executable()
+  File "C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\build.py", line 96, in build_executable
+    PyInstaller.__main__.run(options)
+  File "C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\yt-venv\Lib\site-packages\PyInstaller\__main__.py", line 215, in run
+    run_build(pyi_config, spec_file, **vars(args))
+  File "C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\yt-venv\Lib\site-packages\PyInstaller\__main__.py", line 70, in run_build
+    PyInstaller.building.build_main.main(pyi_config, spec_file, **kwargs)
+  File "C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\yt-venv\Lib\site-packages\PyInstaller\building\build_main.py", line 1270, in main
+    build(specfile, distpath, workpath, clean_build)
+  File "C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\yt-venv\Lib\site-packages\PyInstaller\building\build_main.py", line 1208, in build
+    exec(code, spec_namespace)
+  File "C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\YouTubeDownloader.spec", line 28, in <module>
+    exe = EXE(
+          ^^^^
+  File "C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\yt-venv\Lib\site-packages\PyInstaller\building\api.py", line 658, in __init__
+    self.__postinit__()
+  File "C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\yt-venv\Lib\site-packages\PyInstaller\building\datastruct.py", line 184, in __postinit__
+    self.assemble()
+  File "C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\yt-venv\Lib\site-packages\PyInstaller\building\api.py", line 856, in assemble
+    self._retry_operation(winutils.update_exe_pe_checksum, build_name)
+  File "C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\yt-venv\Lib\site-packages\PyInstaller\building\api.py", line 1033, in _retry_operation
+    return func(*args)
+           ^^^^^^^^^^^
+  File "C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\yt-venv\Lib\site-packages\PyInstaller\utils\win32\winutils.py", line 96, in update_exe_pe_checksum
+    raise RuntimeError("Failed to compute PE checksum!") from e
+RuntimeError: Failed to compute PE checksum!
+(yt-venv)
+⎯○○○⎯  18:31:05   Jona

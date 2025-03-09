@@ -1,0 +1,223 @@
+╰○○○⎯  cd "C:\tmp\YouTubeDownloader"
+(yt-venv)
+                                                  ⎯○○○⎯  18:40:06  JonathanBaldwin    C:\tmp\YouTubeDownloader ⎯○○○╮
+╰○○○⎯  ls
+
+    Directory: C:\tmp\YouTubeDownloader
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            3/5/2025  6:28 PM                build
+d----            3/5/2025  6:32 PM                dist
+da---            3/5/2025  6:39 PM                yt-venv
+-a---            3/5/2025  5:57 PM           3208 build.py
+-a---            3/4/2025  2:51 PM           1759 download_history.log
+-a---            3/1/2025  7:33 PM           1273 install.py
+-a---            3/1/2025  7:33 PM           1649 README.md
+-a---            3/5/2025  6:28 PM            121 runtime-hook.py
+-a---            3/5/2025  6:01 PM             60 settings.json
+-a---            3/5/2025  6:28 PM            653 version.txt
+-a---            3/5/2025  6:01 PM          16360 youtube_downloader.py
+-a---            3/5/2025  6:28 PM           1124 YouTubeDownloader.spec
+-a---            3/5/2025  5:01 PM       28561216 YouTubeDownloader.txt
+
+(yt-venv)
+                                                  ⎯○○○⎯  18:40:11  JonathanBaldwin    C:\tmp\YouTubeDownloader ⎯○○○╮
+╰○○○⎯  python build.py
+Warning: Could not create icon file
+122 DEPRECATION: Running PyInstaller as admin is not necessary nor sensible. Run PyInstaller from a non-administrator terminal. PyInstaller 7.0 will block this.
+330 INFO: PyInstaller: 6.12.0, contrib hooks: 2025.1
+330 INFO: Python: 3.12.9
+402 INFO: Platform: Windows-11-10.0.26100-SP0
+403 INFO: Python environment: C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\yt-venv
+403 INFO: wrote C:\tmp\YouTubeDownloader\YouTubeDownloader.spec
+407 INFO: Removing temporary files and cleaning cache in C:\Users\JonathanBaldwin\AppData\Local\pyinstaller
+3140 INFO: Module search paths (PYTHONPATH):
+['C:\\tmp\\YouTubeDownloader',
+ 'C:\\Program Files\\Python312\\python312.zip',
+ 'C:\\Program Files\\Python312\\DLLs',
+ 'C:\\Program Files\\Python312\\Lib',
+ 'C:\\Program Files\\Python312',
+ 'C:\\Users\\JonathanBaldwin\\OneDrive - '
+ 'sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv',
+ 'C:\\Users\\JonathanBaldwin\\OneDrive - '
+ 'sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages',
+ 'C:\\Users\\JonathanBaldwin\\OneDrive - '
+ 'sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\setuptools\\_vendor',
+ 'C:\\tmp\\YouTubeDownloader']
+3767 INFO: Appending 'datas' from .spec
+3862 INFO: checking Analysis
+3862 INFO: Building Analysis because Analysis-00.toc is non existent
+3863 INFO: Running Analysis Analysis-00.toc
+3863 INFO: Target bytecode optimization level: 0
+3863 INFO: Initializing module dependency graph...
+3864 INFO: Initializing module graph hook caches...
+3901 INFO: Analyzing modules for base_library.zip ...
+5634 INFO: Processing standard module hook 'hook-encodings.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+8189 INFO: Processing standard module hook 'hook-pickle.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+10087 INFO: Processing standard module hook 'hook-heapq.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+12935 INFO: Caching module dependency graph...
+12960 INFO: Looking for Python shared library...
+12965 INFO: Using Python shared library: C:\Program Files\Python312\python312.dll
+12966 INFO: Analyzing C:\tmp\YouTubeDownloader\youtube_downloader.py
+12990 INFO: Processing pre-find-module-path hook 'hook-tkinter.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_find_module_path'
+12992 INFO: TclTkInfo: initializing cached Tcl/Tk info...
+13336 INFO: Processing standard module hook 'hook-_tkinter.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+13574 INFO: Processing standard module hook 'hook-yt_dlp.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\yt_dlp\\__pyinstaller'
+Adding imports: ['yt_dlp.compat._legacy', 'yt_dlp.compat._deprecated', 'yt_dlp.utils._legacy', 'yt_dlp.utils._deprecated', 'Cryptodome', 'mutagen', 'brotli', 'certifi', 'secretstorage', 'curl_cffi']
+13727 WARNING: collect_data_files - skipping data collection for module 'curl_cffi' as it is not a package.
+14441 INFO: Processing standard module hook 'hook-xml.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+14533 INFO: Processing standard module hook 'hook-xml.etree.cElementTree.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+15039 INFO: Processing standard module hook 'hook-platform.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+15098 INFO: Processing standard module hook 'hook-sqlite3.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+16242 INFO: Processing standard module hook 'hook-multiprocessing.util.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+40336 INFO: Analyzing hidden import 'yt_dlp.__main__'
+40356 INFO: Analyzing hidden import 'yt_dlp.__pyinstaller'
+40366 INFO: Analyzing hidden import 'yt_dlp.__pyinstaller.hook-yt_dlp'
+40606 INFO: Processing standard module hook 'hook-sysconfig.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+40906 INFO: Processing pre-safe-import-module hook 'hook-importlib_metadata.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+40906 INFO: SetuptoolsInfo: initializing cached setuptools info...
+43619 INFO: Setuptools: 'importlib_metadata' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.importlib_metadata'!
+43642 INFO: Processing standard module hook 'hook-setuptools.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+43717 INFO: Processing pre-safe-import-module hook 'hook-distutils.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+43829 INFO: Processing pre-safe-import-module hook 'hook-jaraco.functools.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+43829 INFO: Setuptools: 'jaraco.functools' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.jaraco.functools'!
+43858 INFO: Processing pre-safe-import-module hook 'hook-more_itertools.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+43858 INFO: Setuptools: 'more_itertools' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.more_itertools'!
+44099 INFO: Processing pre-safe-import-module hook 'hook-packaging.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+44146 INFO: Processing standard module hook 'hook-packaging.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+44419 INFO: Processing pre-safe-import-module hook 'hook-jaraco.text.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+44419 INFO: Setuptools: 'jaraco.text' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.jaraco.text'!
+44446 INFO: Processing standard module hook 'hook-setuptools._vendor.jaraco.text.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+44446 INFO: Processing pre-safe-import-module hook 'hook-importlib_resources.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+44446 INFO: Processing pre-safe-import-module hook 'hook-jaraco.context.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+44446 INFO: Setuptools: 'jaraco.context' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.jaraco.context'!
+44480 INFO: Processing pre-safe-import-module hook 'hook-backports.tarfile.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+44480 INFO: Setuptools: 'backports.tarfile' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.backports.tarfile'!
+44550 INFO: Processing standard module hook 'hook-backports.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+44550 INFO: Processing pre-safe-import-module hook 'hook-typing_extensions.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+45396 INFO: Processing pre-safe-import-module hook 'hook-tomli.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+45396 INFO: Setuptools: 'tomli' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.tomli'!
+45990 INFO: Processing standard module hook 'hook-pkg_resources.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+46486 INFO: Processing pre-safe-import-module hook 'hook-platformdirs.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+46486 INFO: Setuptools: 'platformdirs' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.platformdirs'!
+46906 INFO: Processing pre-safe-import-module hook 'hook-wheel.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+46921 INFO: Setuptools: 'wheel' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.wheel'!
+47441 INFO: Processing standard module hook 'hook-setuptools._vendor.importlib_metadata.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+47446 INFO: Processing pre-safe-import-module hook 'hook-zipp.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+47446 INFO: Setuptools: 'zipp' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.zipp'!
+47688 INFO: Processing standard module hook 'hook-win32ctypes.core.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+48978 INFO: Analyzing hidden import 'yt_dlp.compat._deprecated'
+48999 INFO: Analyzing hidden import 'yt_dlp.compat._legacy'
+49039 INFO: Analyzing hidden import 'yt_dlp.utils._deprecated'
+49046 INFO: Analyzing hidden import 'yt_dlp.utils._legacy'
+49078 INFO: Analyzing hidden import 'pyperclip.__main__'
+49086 INFO: Processing module hooks (post-graph stage)...
+49444 INFO: Processing standard module hook 'hook-difflib.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+50209 INFO: Processing standard module hook 'hook-_tkinter.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks'
+50226 INFO: Performing binary vs. data reclassification (2041 entries)
+59786 INFO: Looking for ctypes DLLs
+59876 INFO: Analyzing run-time hooks ...
+59876 INFO: Including custom run-time hook 'runtime-hook.py'
+59891 INFO: Including run-time hook 'pyi_rth_inspect.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+59906 INFO: Including run-time hook 'pyi_rth_pkgutil.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+59929 INFO: Including run-time hook 'pyi_rth_multiprocessing.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+59940 INFO: Including run-time hook 'pyi_rth_pkgres.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+59962 INFO: Including run-time hook 'pyi_rth_setuptools.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+59976 INFO: Including run-time hook 'pyi_rth__tkinter.py' from 'C:\\Users\\JonathanBaldwin\\OneDrive - sinoverpi\\Documents\\03_computer\\Python\\YouTubeDownloader\\yt-venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+60037 INFO: Creating base_library.zip...
+60079 INFO: Looking for dynamic libraries
+60911 INFO: Extra DLL search directories (AddDllDirectory): []
+60911 INFO: Extra DLL search directories (PATH): []
+61209 INFO: Warnings written to C:\tmp\YouTubeDownloader\build\YouTubeDownloader\warn-YouTubeDownloader.txt
+61309 INFO: Graph cross-reference written to C:\tmp\YouTubeDownloader\build\YouTubeDownloader\xref-YouTubeDownloader.html
+61478 INFO: checking PYZ
+61510 INFO: Building PYZ because PYZ-00.toc is non existent
+61510 INFO: Building PYZ (ZlibArchive) C:\tmp\YouTubeDownloader\build\YouTubeDownloader\PYZ-00.pyz
+62589 INFO: Building PYZ (ZlibArchive) C:\tmp\YouTubeDownloader\build\YouTubeDownloader\PYZ-00.pyz completed successfully.
+62649 INFO: checking PKG
+62649 INFO: Building PKG because PKG-00.toc is non existent
+62649 INFO: Building PKG (CArchive) YouTubeDownloader.pkg
+65947 INFO: Building PKG (CArchive) YouTubeDownloader.pkg completed successfully.
+65973 INFO: Bootloader C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\yt-venv\Lib\site-packages\PyInstaller\bootloader\Windows-64bit-intel\runw.exe
+65973 INFO: checking EXE
+65973 INFO: Building EXE because EXE-00.toc is non existent
+65973 INFO: Building EXE from EXE-00.toc
+65974 INFO: Copying bootloader EXE to C:\tmp\YouTubeDownloader\dist\YouTubeDownloader.exe
+65978 INFO: Copying icon to EXE
+65989 INFO: Copying version information to EXE
+65995 INFO: Copying 0 resources to EXE
+65995 INFO: Embedding manifest in EXE
+66984 INFO: Appending PKG archive to EXE
+96044 INFO: Fixing EXE headers
+99714 WARNING: Execution of 'set_exe_build_timestamp' failed on attempt #1 / 20: Exception("Unable to access file 'C:\\tmp\\YouTubeDownloader\\dist\\YouTubeDownloader.exe': [Errno 22] Invalid argument: 'C:\\\\tmp\\\\YouTubeDownloader\\\\dist\\\\YouTubeDownloader.exe'"). Retrying in 0.05 second(s)...
+99768 WARNING: Execution of 'set_exe_build_timestamp' failed on attempt #2 / 20: Exception("Unable to access file 'C:\\tmp\\YouTubeDownloader\\dist\\YouTubeDownloader.exe': [Errno 22] Invalid argument: 'C:\\\\tmp\\\\YouTubeDownloader\\\\dist\\\\YouTubeDownloader.exe'"). Retrying in 0.06 second(s)...
+99824 WARNING: Execution of 'set_exe_build_timestamp' failed on attempt #3 / 20: Exception("Unable to access file 'C:\\tmp\\YouTubeDownloader\\dist\\YouTubeDownloader.exe': [Errno 22] Invalid argument: 'C:\\\\tmp\\\\YouTubeDownloader\\\\dist\\\\YouTubeDownloader.exe'"). Retrying in 0.06 second(s)...
+99884 WARNING: Execution of 'set_exe_build_timestamp' failed on attempt #4 / 20: Exception("Unable to access file 'C:\\tmp\\YouTubeDownloader\\dist\\YouTubeDownloader.exe': [Errno 22] Invalid argument: 'C:\\\\tmp\\\\YouTubeDownloader\\\\dist\\\\YouTubeDownloader.exe'"). Retrying in 0.06 second(s)...
+99947 WARNING: Execution of 'set_exe_build_timestamp' failed on attempt #5 / 20: Exception("Unable to access file 'C:\\tmp\\YouTubeDownloader\\dist\\YouTubeDownloader.exe': [Errno 22] Invalid argument: 'C:\\\\tmp\\\\YouTubeDownloader\\\\dist\\\\YouTubeDownloader.exe'"). Retrying in 0.07 second(s)...
+100015 WARNING: Execution of 'set_exe_build_timestamp' failed on attempt #6 / 20: Exception("Unable to access file 'C:\\tmp\\YouTubeDownloader\\dist\\YouTubeDownloader.exe': [Errno 22] Invalid argument: 'C:\\\\tmp\\\\YouTubeDownloader\\\\dist\\\\YouTubeDownloader.exe'"). Retrying in 0.07 second(s)...
+100087 WARNING: Execution of 'set_exe_build_timestamp' failed on attempt #7 / 20: Exception("Unable to access file 'C:\\tmp\\YouTubeDownloader\\dist\\YouTubeDownloader.exe': [Errno 22] Invalid argument: 'C:\\\\tmp\\\\YouTubeDownloader\\\\dist\\\\YouTubeDownloader.exe'"). Retrying in 0.08 second(s)...
+100164 WARNING: Execution of 'set_exe_build_timestamp' failed on attempt #8 / 20: Exception("Unable to access file 'C:\\tmp\\YouTubeDownloader\\dist\\YouTubeDownloader.exe': [Errno 22] Invalid argument: 'C:\\\\tmp\\\\YouTubeDownloader\\\\dist\\\\YouTubeDownloader.exe'"). Retrying in 0.08 second(s)...
+100248 WARNING: Execution of 'set_exe_build_timestamp' failed on attempt #9 / 20: Exception("Unable to access file 'C:\\tmp\\YouTubeDownloader\\dist\\YouTubeDownloader.exe': [Errno 22] Invalid argument: 'C:\\\\tmp\\\\YouTubeDownloader\\\\dist\\\\YouTubeDownloader.exe'"). Retrying in 0.09 second(s)...
+100339 WARNING: Execution of 'set_exe_build_timestamp' failed on attempt #10 / 20: Exception("Unable to access file 'C:\\tmp\\YouTubeDownloader\\dist\\YouTubeDownloader.exe': [Errno 22] Invalid argument: 'C:\\\\tmp\\\\YouTubeDownloader\\\\dist\\\\YouTubeDownloader.exe'"). Retrying in 0.10 second(s)...
+100440 WARNING: Execution of 'set_exe_build_timestamp' failed on attempt #11 / 20: Exception("Unable to access file 'C:\\tmp\\YouTubeDownloader\\dist\\YouTubeDownloader.exe': [Errno 22] Invalid argument: 'C:\\\\tmp\\\\YouTubeDownloader\\\\dist\\\\YouTubeDownloader.exe'"). Retrying in 0.11 second(s)...
+100553 WARNING: Execution of 'set_exe_build_timestamp' failed on attempt #12 / 20: Exception("Unable to access file 'C:\\tmp\\YouTubeDownloader\\dist\\YouTubeDownloader.exe': [Errno 22] Invalid argument: 'C:\\\\tmp\\\\YouTubeDownloader\\\\dist\\\\YouTubeDownloader.exe'"). Retrying in 0.12 second(s)...
+100680 WARNING: Execution of 'set_exe_build_timestamp' failed on attempt #13 / 20: Exception("Unable to access file 'C:\\tmp\\YouTubeDownloader\\dist\\YouTubeDownloader.exe': [Errno 22] Invalid argument: 'C:\\\\tmp\\\\YouTubeDownloader\\\\dist\\\\YouTubeDownloader.exe'"). Retrying in 0.14 second(s)...
+100825 WARNING: Execution of 'set_exe_build_timestamp' failed on attempt #14 / 20: Exception("Unable to access file 'C:\\tmp\\YouTubeDownloader\\dist\\YouTubeDownloader.exe': [Errno 22] Invalid argument: 'C:\\\\tmp\\\\YouTubeDownloader\\\\dist\\\\YouTubeDownloader.exe'"). Retrying in 0.17 second(s)...
+100997 WARNING: Execution of 'set_exe_build_timestamp' failed on attempt #15 / 20: Exception("Unable to access file 'C:\\tmp\\YouTubeDownloader\\dist\\YouTubeDownloader.exe': [Errno 22] Invalid argument: 'C:\\\\tmp\\\\YouTubeDownloader\\\\dist\\\\YouTubeDownloader.exe'"). Retrying in 0.20 second(s)...
+101199 WARNING: Execution of 'set_exe_build_timestamp' failed on attempt #16 / 20: Exception("Unable to access file 'C:\\tmp\\YouTubeDownloader\\dist\\YouTubeDownloader.exe': [Errno 22] Invalid argument: 'C:\\\\tmp\\\\YouTubeDownloader\\\\dist\\\\YouTubeDownloader.exe'"). Retrying in 0.25 second(s)...
+101450 WARNING: Execution of 'set_exe_build_timestamp' failed on attempt #17 / 20: Exception("Unable to access file 'C:\\tmp\\YouTubeDownloader\\dist\\YouTubeDownloader.exe': [Errno 22] Invalid argument: 'C:\\\\tmp\\\\YouTubeDownloader\\\\dist\\\\YouTubeDownloader.exe'"). Retrying in 0.33 second(s)...
+101783 WARNING: Execution of 'set_exe_build_timestamp' failed on attempt #18 / 20: Exception("Unable to access file 'C:\\tmp\\YouTubeDownloader\\dist\\YouTubeDownloader.exe': [Errno 22] Invalid argument: 'C:\\\\tmp\\\\YouTubeDownloader\\\\dist\\\\YouTubeDownloader.exe'"). Retrying in 0.50 second(s)...
+102284 WARNING: Execution of 'set_exe_build_timestamp' failed on attempt #19 / 20: Exception("Unable to access file 'C:\\tmp\\YouTubeDownloader\\dist\\YouTubeDownloader.exe': [Errno 22] Invalid argument: 'C:\\\\tmp\\\\YouTubeDownloader\\\\dist\\\\YouTubeDownloader.exe'"). Retrying in 1.00 second(s)...
+103285 WARNING: Execution of 'set_exe_build_timestamp' failed on attempt #20 / 20: Exception("Unable to access file 'C:\\tmp\\YouTubeDownloader\\dist\\YouTubeDownloader.exe': [Errno 22] Invalid argument: 'C:\\\\tmp\\\\YouTubeDownloader\\\\dist\\\\YouTubeDownloader.exe'").
+Traceback (most recent call last):
+  File "C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\yt-venv\Lib\site-packages\pefile.py", line 2975, in __parse__
+    fd = open(fname, "rb")
+         ^^^^^^^^^^^^^^^^^
+OSError: [Errno 22] Invalid argument: 'C:\\tmp\\YouTubeDownloader\\dist\\YouTubeDownloader.exe'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\yt-venv\Lib\site-packages\PyInstaller\building\api.py", line 1033, in _retry_operation
+    return func(*args)
+           ^^^^^^^^^^^
+  File "C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\yt-venv\Lib\site-packages\PyInstaller\utils\win32\winutils.py", line 56, in set_exe_build_timestamp
+    with pefile.PE(exe_path, fast_load=True) as pe:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\yt-venv\Lib\site-packages\pefile.py", line 2895, in __init__
+    self.__parse__(name, data, fast_load)
+  File "C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\yt-venv\Lib\site-packages\pefile.py", line 2987, in __parse__
+    raise Exception(
+Exception: Unable to access file 'C:\tmp\YouTubeDownloader\dist\YouTubeDownloader.exe': [Errno 22] Invalid argument: 'C:\\tmp\\YouTubeDownloader\\dist\\YouTubeDownloader.exe'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\tmp\YouTubeDownloader\build.py", line 109, in <module>
+    build_executable()
+  File "C:\tmp\YouTubeDownloader\build.py", line 96, in build_executable
+    PyInstaller.__main__.run(options)
+  File "C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\yt-venv\Lib\site-packages\PyInstaller\__main__.py", line 215, in run
+    run_build(pyi_config, spec_file, **vars(args))
+  File "C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\yt-venv\Lib\site-packages\PyInstaller\__main__.py", line 70, in run_build
+    PyInstaller.building.build_main.main(pyi_config, spec_file, **kwargs)
+  File "C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\yt-venv\Lib\site-packages\PyInstaller\building\build_main.py", line 1270, in main
+    build(specfile, distpath, workpath, clean_build)
+  File "C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\yt-venv\Lib\site-packages\PyInstaller\building\build_main.py", line 1208, in build
+    exec(code, spec_namespace)
+  File "C:\tmp\YouTubeDownloader\YouTubeDownloader.spec", line 28, in <module>
+    exe = EXE(
+          ^^^^
+  File "C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\yt-venv\Lib\site-packages\PyInstaller\building\api.py", line 658, in __init__
+    self.__postinit__()
+  File "C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\yt-venv\Lib\site-packages\PyInstaller\building\datastruct.py", line 184, in __postinit__
+    self.assemble()
+  File "C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\yt-venv\Lib\site-packages\PyInstaller\building\api.py", line 855, in assemble
+    self._retry_operation(winutils.set_exe_build_timestamp, build_name, build_timestamp)
+  File "C:\Users\JonathanBaldwin\OneDrive - sinoverpi\Documents\03_computer\Python\YouTubeDownloader\yt-venv\Lib\site-packages\PyInstaller\building\api.py", line 1052, in _retry_operation
+    raise RuntimeError(f"Execution of {func_name!r} failed - no more attempts left!") from e
+RuntimeError: Execution of 'set_exe_build_timestamp' failed - no more attempts left!
+(yt-venv)
+                                                  ⎯○○○⎯  18:42:07  JonathanBaldwin    C:\tmp\YouTubeDownloader ⎯○○○╮
+╰○○○⎯ 
