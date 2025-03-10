@@ -1,5 +1,5 @@
 // Background script for YouTube Video Downloader
-const API_BASE_URL = 'http://localhost:5000';
+const API_BASE_URL = 'https://' + window.location.hostname;
 
 // Set up context menu
 chrome.runtime.onInstalled.addListener(() => {
@@ -27,14 +27,17 @@ async function initiateDownload(videoUrl) {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ url: videoUrl })
+      body: JSON.stringify({ 
+        url: videoUrl,
+        options: await chrome.storage.sync.get(['quality', 'format'])
+      })
     });
-    
+
     const data = await response.json();
     if (data.success) {
       chrome.notifications.create({
         type: 'basic',
-        iconUrl: 'icons/icon128.svg',
+        iconUrl: 'icons/icon128.png',
         title: 'Download Started',
         message: 'Your video download has begun.'
       });
@@ -45,7 +48,7 @@ async function initiateDownload(videoUrl) {
     console.error('Download error:', error);
     chrome.notifications.create({
       type: 'basic',
-      iconUrl: 'icons/icon128.svg',
+      iconUrl: 'icons/icon128.png',
       title: 'Download Failed',
       message: error.message
     });
