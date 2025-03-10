@@ -170,8 +170,11 @@ def download():
         return '', 204
 
     try:
+        logger.info(f"Received request from: {request.headers.get('Origin')}")
+        logger.info(f"Request headers: {dict(request.headers)}")
+
         data = request.get_json()
-        logger.debug(f"Received download request: {data}")
+        logger.info(f"Received download request: {data}")
 
         url = data.get('url')
         options = data.get('options', {
@@ -180,16 +183,17 @@ def download():
         })
 
         if not url:
+            logger.error("No URL provided in request")
             return jsonify({'success': False, 'error': 'No URL provided'}), 400
 
         downloader = YouTubeDownloader()
         result = downloader.download_video(url, options)
-        logger.debug(f"Download result: {result}")
+        logger.info(f"Download result: {result}")
 
         return jsonify(result)
 
     except Exception as e:
-        logger.error(f"Download API error: {str(e)}")
+        logger.error(f"Download API error: {str(e)}", exc_info=True)
         return jsonify({'success': False, 'error': str(e)}), 500
 
 def run_flask():

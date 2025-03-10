@@ -1,5 +1,5 @@
 // Background script for YouTube Video Downloader
-const API_BASE_URL = 'https://' + window.location.hostname;
+const API_BASE_URL = 'https://' + chrome.runtime.getURL('').split('://')[1].split('/')[0];
 
 // Set up context menu
 chrome.runtime.onInstalled.addListener(() => {
@@ -19,9 +19,18 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   }
 });
 
+// Handle messages from popup
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'download') {
+    initiateDownload(request.url, request.options, sendResponse);
+    return true; // Keep the message channel open for async response
+  }
+});
+
 // Communication with Flask backend
-async function initiateDownload(videoUrl) {
+async function initiateDownload(videoUrl, options = null) {
   try {
+    console.log('Making request to:', `${API_BASE_URL}/download`);
     const response = await fetch(`${API_BASE_URL}/download`, {
       method: 'POST',
       headers: {
@@ -29,9 +38,13 @@ async function initiateDownload(videoUrl) {
       },
       body: JSON.stringify({ 
         url: videoUrl,
-        options: await chrome.storage.sync.get(['quality', 'format'])
+        options: options || await chrome.storage.sync.get(['quality', 'format'])
       })
     });
+
+    if (!response.ok) {
+      throw new Error(`Server responded with status: ${response.status}`);
+    }
 
     const data = await response.json();
     if (data.success) {
@@ -41,6 +54,7 @@ async function initiateDownload(videoUrl) {
         title: 'Download Started',
         message: 'Your video download has begun.'
       });
+      return { success: true };
     } else {
       throw new Error(data.error || 'Download failed');
     }
@@ -52,5 +66,6 @@ async function initiateDownload(videoUrl) {
       title: 'Download Failed',
       message: error.message
     });
+    return { success: false, error: error.message };
   }
 }

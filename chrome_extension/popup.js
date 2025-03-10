@@ -34,29 +34,21 @@ document.addEventListener('DOMContentLoaded', () => {
       statusElement.style.color = '#666';
 
       try {
-        // Get the current domain from the extension URL
-        const response = await fetch(`${window.location.origin}/download`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            url: tab.url,
-            options: { quality, format }
-          })
+        // Use the background script to make the request
+        chrome.runtime.sendMessage({
+          action: 'download',
+          url: tab.url,
+          options: { quality, format }
+        }, (response) => {
+          if (response && response.success) {
+            statusElement.textContent = 'Download started successfully!';
+            statusElement.style.color = '#4CAF50';
+          } else {
+            const error = response ? response.error : 'Download failed';
+            statusElement.textContent = `Error: ${error}`;
+            statusElement.style.color = '#f44336';
+          }
         });
-
-        if (!response.ok) {
-          throw new Error(`Server responded with status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        if (data.success) {
-          statusElement.textContent = 'Download started successfully!';
-          statusElement.style.color = '#4CAF50';
-        } else {
-          throw new Error(data.error || 'Download failed');
-        }
       } catch (error) {
         console.error('Download error:', error);
         statusElement.textContent = `Error: ${error.message}. Please ensure the server is running.`;
