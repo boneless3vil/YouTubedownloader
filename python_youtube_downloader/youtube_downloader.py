@@ -33,45 +33,45 @@ class YouTubeDownloader:
         logger.debug("Initializing YouTube Downloader GUI")
         self.root.title("YouTube Video Downloader")
         self.root.geometry("600x400")
-        
+
         # Create main frame
         main_frame = ttk.Frame(self.root, padding="10")
         main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-        
+
         # URL Entry
         ttk.Label(main_frame, text="YouTube URL:").grid(row=0, column=0, sticky=tk.W)
         self.url_var = tk.StringVar()
         self.url_entry = ttk.Entry(main_frame, textvariable=self.url_var, width=50)
         self.url_entry.grid(row=0, column=1, padx=5, pady=5, columnspan=2)
-        
+
         # Quality Selection
         ttk.Label(main_frame, text="Quality:").grid(row=1, column=0, sticky=tk.W)
         self.quality_var = tk.StringVar(value="highest")
         quality_combo = ttk.Combobox(main_frame, textvariable=self.quality_var)
         quality_combo['values'] = ('highest', '1080p', '720p', '480p', '360p')
         quality_combo.grid(row=1, column=1, padx=5, pady=5)
-        
+
         # Format Selection
         ttk.Label(main_frame, text="Format:").grid(row=2, column=0, sticky=tk.W)
         self.format_var = tk.StringVar(value="mp4")
         format_combo = ttk.Combobox(main_frame, textvariable=self.format_var)
         format_combo['values'] = ('mp4', 'webm')
         format_combo.grid(row=2, column=1, padx=5, pady=5)
-        
+
         # Download Button
         self.download_btn = ttk.Button(main_frame, text="Download", command=self.download_video)
         self.download_btn.grid(row=3, column=1, pady=20)
-        
+
         # Progress Bar
         self.progress_var = tk.DoubleVar()
         self.progress_bar = ttk.Progressbar(main_frame, length=400, mode='determinate', variable=self.progress_var)
         self.progress_bar.grid(row=4, column=0, columnspan=3, pady=10)
-        
+
         # Status Label
         self.status_var = tk.StringVar(value="Ready")
         self.status_label = ttk.Label(main_frame, textvariable=self.status_var)
         self.status_label.grid(row=5, column=0, columnspan=3)
-        
+
         logger.debug("GUI setup completed successfully")
 
     def load_settings(self):
@@ -107,7 +107,7 @@ class YouTubeDownloader:
                 'quality': self.quality_var.get(),
                 'format': self.format_var.get()
             }
-            
+
         if not url:
             return {'success': False, 'error': 'No URL provided'}
 
@@ -122,9 +122,9 @@ class YouTubeDownloader:
 
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 ydl.download([url])
-            
+
             return {'success': True}
-            
+
         except Exception as e:
             error_msg = str(e)
             logger.error(f"Download error: {error_msg}")
@@ -149,32 +149,45 @@ class YouTubeDownloader:
         """Make the class callable for easier instantiation"""
         logger.debug("GUI initialization completed")
 
+
 # Create Flask app instance
 flask_app = Flask(__name__)
-CORS(flask_app)  # Enable CORS for Chrome extension
+CORS(flask_app, resources={
+    r"/*": {
+        "origins": "*",
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type"]
+    }
+})
 
 @flask_app.route('/')
 def index():
     return "YouTube Downloader API is running"
 
-@flask_app.route('/download', methods=['POST'])
+@flask_app.route('/download', methods=['POST', 'OPTIONS'])
 def download():
+    if request.method == 'OPTIONS':
+        return '', 204
+
     try:
         data = request.get_json()
+        logger.debug(f"Received download request: {data}")
+
         url = data.get('url')
         options = data.get('options', {
             'quality': 'highest',
             'format': 'mp4'
         })
-        
+
         if not url:
             return jsonify({'success': False, 'error': 'No URL provided'}), 400
-            
+
         downloader = YouTubeDownloader()
         result = downloader.download_video(url, options)
-        
+        logger.debug(f"Download result: {result}")
+
         return jsonify(result)
-        
+
     except Exception as e:
         logger.error(f"Download API error: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -244,9 +257,9 @@ def main():
         if not isinstance(e, SystemExit):
             try:
                 if not headless:
-                    messagebox.showerror("Fatal Error", 
-                                     f"Application failed to start: {str(e)}\n\n"
-                                     "Please check the logs for more details.")
+                    messagebox.showerror("Fatal Error",
+                                         f"Application failed to start: {str(e)}\n\n"
+                                         "Please check the logs for more details.")
             except:
                 print("FATAL ERROR:", str(e))
         sys.exit(1)

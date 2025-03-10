@@ -34,7 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
       statusElement.style.color = '#666';
 
       try {
-        const response = await fetch(`https://${window.location.hostname}/download`, {
+        // Get the current domain from the extension URL
+        const response = await fetch(`${window.location.origin}/download`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -45,6 +46,10 @@ document.addEventListener('DOMContentLoaded', () => {
           })
         });
 
+        if (!response.ok) {
+          throw new Error(`Server responded with status: ${response.status}`);
+        }
+
         const data = await response.json();
         if (data.success) {
           statusElement.textContent = 'Download started successfully!';
@@ -54,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       } catch (error) {
         console.error('Download error:', error);
-        statusElement.textContent = `Error: ${error.message}`;
+        statusElement.textContent = `Error: ${error.message}. Please ensure the server is running.`;
         statusElement.style.color = '#f44336';
       }
     } else {
