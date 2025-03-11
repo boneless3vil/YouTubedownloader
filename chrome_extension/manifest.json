@@ -15,8 +15,13 @@
     "*://*.replit.app/*"
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
+  "content_scripts": [{
+    "matches": ["*://*.youtube.com/*"],
+    "js": ["content.js"]
+  }],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {

@@ -1,5 +1,5 @@
 // Background script for YouTube Video Downloader
-const API_BASE_URL = `https://${location.hostname.replace('chrome-extension://', '')}`;
+let API_BASE_URL = '';
 
 // Initialize context menu
 chrome.runtime.onInstalled.addListener(() => {
@@ -9,6 +9,10 @@ chrome.runtime.onInstalled.addListener(() => {
     contexts: ['link', 'video'],
     documentUrlPatterns: ['*://*.youtube.com/*']
   });
+
+  // Get server URL based on extension ID
+  API_BASE_URL = `https://${chrome.runtime.id}.replit.app`;
+  console.log('Server URL set to:', API_BASE_URL);
 });
 
 // Handle context menu clicks
@@ -19,7 +23,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   }
 });
 
-// Handle messages from popup
+// Handle messages from popup and content script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'download') {
     initiateDownload(request.url, request.options)
@@ -32,7 +36,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // Communication with Flask backend
 async function initiateDownload(videoUrl, options = null) {
   try {
-    console.log('Connecting to server at:', API_BASE_URL);
+    console.log('Initiating download request to:', API_BASE_URL);
+    console.log('Video URL:', videoUrl);
+    console.log('Options:', options);
 
     const response = await fetch(`${API_BASE_URL}/download`, {
       method: 'POST',
