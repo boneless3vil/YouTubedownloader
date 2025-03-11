@@ -15,6 +15,72 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Create Flask app instance
+flask_app = Flask(__name__)
+CORS(flask_app, resources={
+    r"/*": {
+        "origins": ["chrome-extension://*", "moz-extension://*", "http://localhost:5000", "*"],
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Accept", "Origin"],
+        "expose_headers": ["Content-Type", "Content-Length"],
+        "supports_credentials": False,
+        "max_age": 3600
+    }
+})
+
+@flask_app.route('/')
+def index():
+    """Health check endpoint"""
+    logger.info(f"Health check request received from: {request.headers.get('Origin')}")
+    logger.info(f"Request headers: {dict(request.headers)}")
+    logger.info(f"Client IP: {request.remote_addr}")
+
+    response = jsonify({
+        "status": "ok",
+        "message": "YouTube Downloader API is running"
+    })
+
+    # Ensure CORS headers are set correctly for the specific origin
+    origin = request.headers.get('Origin', '*')
+    response.headers['Access-Control-Allow-Origin'] = origin
+    if origin != '*':
+        response.headers['Vary'] = 'Origin'
+
+    return response
+
+@flask_app.route('/download', methods=['POST', 'OPTIONS'])
+def download():
+    if request.method == 'OPTIONS':
+        return '', 204
+
+    try:
+        logger.info(f"Received request from: {request.headers.get('Origin')}")
+        logger.info(f"Request headers: {dict(request.headers)}")
+        logger.info(f"Client IP: {request.remote_addr}")
+
+        data = request.get_json()
+        logger.info(f"Received download request: {data}")
+
+        url = data.get('url')
+        options = data.get('options', {
+            'quality': 'highest',
+            'format': 'mp4'
+        })
+
+        if not url:
+            logger.error("No URL provided in request")
+            return jsonify({'success': False, 'error': 'No URL provided'}), 400
+
+        downloader = YouTubeDownloader()
+        result = downloader.download_video(url, options)
+        logger.info(f"Download result: {result}")
+
+        return jsonify(result)
+
+    except Exception as e:
+        logger.error(f"Download API error: {str(e)}", exc_info=True)
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 class YouTubeDownloader:
     def __init__(self, root=None):
         self.root = root
@@ -150,56 +216,7 @@ class YouTubeDownloader:
         logger.debug("GUI initialization completed")
 
 
-# Create Flask app instance
-flask_app = Flask(__name__)
-CORS(flask_app, resources={
-    r"/*": {
-        "origins": "*",
-        "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type"]
-    }
-})
-
-@flask_app.route('/')
-def index():
-    """Health check endpoint"""
-    return jsonify({
-        "status": "ok",
-        "message": "YouTube Downloader API is running"
-    })
-
-@flask_app.route('/download', methods=['POST', 'OPTIONS'])
-def download():
-    if request.method == 'OPTIONS':
-        return '', 204
-
-    try:
-        logger.info(f"Received request from: {request.headers.get('Origin')}")
-        logger.info(f"Request headers: {dict(request.headers)}")
-
-        data = request.get_json()
-        logger.info(f"Received download request: {data}")
-
-        url = data.get('url')
-        options = data.get('options', {
-            'quality': 'highest',
-            'format': 'mp4'
-        })
-
-        if not url:
-            logger.error("No URL provided in request")
-            return jsonify({'success': False, 'error': 'No URL provided'}), 400
-
-        downloader = YouTubeDownloader()
-        result = downloader.download_video(url, options)
-        logger.info(f"Download result: {result}")
-
-        return jsonify(result)
-
-    except Exception as e:
-        logger.error(f"Download API error: {str(e)}", exc_info=True)
-        return jsonify({'success': False, 'error': str(e)}), 500
-
+# Start Flask server in a separate thread
 def run_flask():
     try:
         flask_app.run(host='0.0.0.0', port=5000, threaded=True)

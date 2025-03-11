@@ -33,31 +33,47 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // Communication with Flask backend
 async function initiateDownload(videoUrl, options = null) {
   try {
-    // Get the server URL from the current tab's URL (Replit domain)
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    const serverUrl = tab.url.split('://')[0] + '://' + tab.url.split('://')[1].split('/')[0];
+    // Try localhost first for development
+    const serverUrls = [
+      'http://localhost:5000',
+      'https://' + window.location.hostname
+    ];
 
-    console.log('Attempting to connect to server at:', serverUrl);
+    let serverUrl = null;
+    for (const url of serverUrls) {
+      try {
+        console.log('Attempting to connect to server at:', url);
+        const healthCheck = await fetch(url, {
+          headers: { 
+            'Accept': 'application/json',
+            'Origin': chrome.runtime.getURL('')
+          }
+        });
 
-    // First check if server is available
-    const healthCheck = await fetch(serverUrl, {
-      headers: {
-        'Accept': 'application/json'
+        if (healthCheck.ok) {
+          const data = await healthCheck.json();
+          console.log('Server response:', data);
+          serverUrl = url;
+          console.log('Successfully connected to server at:', url);
+          break;
+        }
+      } catch (error) {
+        console.log('Failed to connect to:', url, error);
       }
-    });
+    }
 
-    if (!healthCheck.ok) {
+    if (!serverUrl) {
       throw new Error('Server is not available. Please ensure the server is running.');
     }
 
     API_BASE_URL = serverUrl;
-    console.log('Successfully connected to server');
 
     const response = await fetch(`${API_BASE_URL}/download`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'Origin': chrome.runtime.getURL('')
       },
       body: JSON.stringify({ 
         url: videoUrl,

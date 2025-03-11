@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Save preferences when changed here
+  // Save preferences when changed
   document.getElementById('quality').addEventListener('change', (e) => {
     chrome.storage.sync.set({ quality: e.target.value });
   });
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tab && tab.url.includes('youtube.com/watch')) {
       const quality = document.getElementById('quality').value;
       const format = document.getElementById('format').value;
-      statusElement.textContent = 'Starting download...';
+      statusElement.textContent = 'Connecting to server...';
       statusElement.style.color = '#666';
 
       try {
@@ -47,11 +47,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const error = response ? response.error : 'Download failed';
             statusElement.textContent = `Error: ${error}`;
             statusElement.style.color = '#f44336';
+            console.error('Download error:', error);
           }
         });
       } catch (error) {
         console.error('Download error:', error);
-        statusElement.textContent = `Error: ${error.message}. Please ensure the server is running.`;
+        statusElement.textContent = `Error: ${error.message}`;
         statusElement.style.color = '#f44336';
       }
     } else {
