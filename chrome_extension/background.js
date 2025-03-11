@@ -1,5 +1,5 @@
 // Background script for YouTube Video Downloader
-let API_BASE_URL = '';
+let API_BASE_URL = 'http://localhost:5000';
 
 // Initialize API URL when extension loads
 chrome.runtime.onInstalled.addListener(() => {
@@ -33,40 +33,22 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // Communication with Flask backend
 async function initiateDownload(videoUrl, options = null) {
   try {
-    // Try localhost first for development
-    const serverUrls = [
-      'http://localhost:5000',
-      'https://' + window.location.hostname
-    ];
+    console.log('Attempting to connect to server at:', API_BASE_URL);
 
-    let serverUrl = null;
-    for (const url of serverUrls) {
-      try {
-        console.log('Attempting to connect to server at:', url);
-        const healthCheck = await fetch(url, {
-          headers: { 
-            'Accept': 'application/json',
-            'Origin': chrome.runtime.getURL('')
-          }
-        });
-
-        if (healthCheck.ok) {
-          const data = await healthCheck.json();
-          console.log('Server response:', data);
-          serverUrl = url;
-          console.log('Successfully connected to server at:', url);
-          break;
-        }
-      } catch (error) {
-        console.log('Failed to connect to:', url, error);
+    // First check if server is available
+    const healthCheck = await fetch(API_BASE_URL, {
+      headers: { 
+        'Accept': 'application/json',
+        'Origin': chrome.runtime.getURL('')
       }
-    }
+    });
 
-    if (!serverUrl) {
+    if (!healthCheck.ok) {
       throw new Error('Server is not available. Please ensure the server is running.');
     }
 
-    API_BASE_URL = serverUrl;
+    const healthData = await healthCheck.json();
+    console.log('Server health check response:', healthData);
 
     const response = await fetch(`${API_BASE_URL}/download`, {
       method: 'POST',
@@ -90,7 +72,7 @@ async function initiateDownload(videoUrl, options = null) {
     if (data.success) {
       chrome.notifications.create({
         type: 'basic',
-        iconUrl: 'icons/icon128.png',
+        iconUrl: 'icons/icon128.svg',
         title: 'Download Started',
         message: 'Your video download has begun.'
       });
@@ -102,7 +84,7 @@ async function initiateDownload(videoUrl, options = null) {
     console.error('Download error:', error);
     chrome.notifications.create({
       type: 'basic',
-      iconUrl: 'icons/icon128.png',
+      iconUrl: 'icons/icon128.svg',
       title: 'Download Failed',
       message: error.message
     });
