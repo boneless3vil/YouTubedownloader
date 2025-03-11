@@ -1,5 +1,5 @@
 // Background script for YouTube Video Downloader
-const API_BASE_URL = 'https://' + chrome.runtime.getURL('').split('://')[1].split('/')[0];
+const API_BASE_URL = 'https://youtube-video-downloader.yourusername.repl.co'; // This will be replaced with your actual Replit URL
 
 // Set up context menu
 chrome.runtime.onInstalled.addListener(() => {
@@ -22,7 +22,9 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 // Handle messages from popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'download') {
-    initiateDownload(request.url, request.options, sendResponse);
+    initiateDownload(request.url, request.options)
+      .then(response => sendResponse(response))
+      .catch(error => sendResponse({ success: false, error: error.message }));
     return true; // Keep the message channel open for async response
   }
 });
@@ -43,7 +45,8 @@ async function initiateDownload(videoUrl, options = null) {
     });
 
     if (!response.ok) {
-      throw new Error(`Server responded with status: ${response.status}`);
+      const errorData = await response.json().catch(() => ({ error: response.statusText }));
+      throw new Error(errorData.error || `Server responded with status: ${response.status}`);
     }
 
     const data = await response.json();
