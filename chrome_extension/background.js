@@ -1,5 +1,5 @@
 // Background script for YouTube Video Downloader
-const API_BASE_URL = 'https://youtube-video-downloader.yourusername.repl.co'; // This will be replaced with your actual Replit URL
+const API_BASE_URL = `https://${location.hostname}`; // This will automatically use the Replit URL
 
 // Set up context menu
 chrome.runtime.onInstalled.addListener(() => {
@@ -32,7 +32,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // Communication with Flask backend
 async function initiateDownload(videoUrl, options = null) {
   try {
-    console.log('Making request to:', `${API_BASE_URL}/download`);
+    console.log('Connecting to server at:', API_BASE_URL);
+
+    // First check if server is available
+    const healthCheck = await fetch(`${API_BASE_URL}/`).catch(() => null);
+    if (!healthCheck?.ok) {
+      throw new Error('Server is not available. Please ensure the server is running.');
+    }
+
     const response = await fetch(`${API_BASE_URL}/download`, {
       method: 'POST',
       headers: {

@@ -162,7 +162,11 @@ CORS(flask_app, resources={
 
 @flask_app.route('/')
 def index():
-    return "YouTube Downloader API is running"
+    """Health check endpoint"""
+    return jsonify({
+        "status": "ok",
+        "message": "YouTube Downloader API is running"
+    })
 
 @flask_app.route('/download', methods=['POST', 'OPTIONS'])
 def download():
