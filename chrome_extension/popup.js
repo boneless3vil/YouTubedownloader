@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Save preferences when changed
+  // Save preferences when changed here
   document.getElementById('quality').addEventListener('change', (e) => {
     chrome.storage.sync.set({ quality: e.target.value });
   });
