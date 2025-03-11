@@ -23,15 +23,24 @@ function addDownloadButton() {
   `;
 
   // Add click handler
-  downloadBtn.addEventListener('click', () => {
-    chrome.runtime.sendMessage({
-      action: 'download',
-      url: window.location.href,
-      options: {
-        quality: 'highest',
-        format: 'mp4'
-      }
-    }, (response) => {
+  downloadBtn.addEventListener('click', async () => {
+    try {
+      downloadBtn.innerHTML = `
+        <div style="display: flex; align-items: center; padding: 8px 16px; color: #666;">
+          <span style="margin-right: 6px;">⏳</span>
+          Starting...
+        </div>
+      `;
+
+      const response = await chrome.runtime.sendMessage({
+        action: 'download',
+        url: window.location.href,
+        options: {
+          quality: 'highest',
+          format: 'mp4'
+        }
+      });
+
       if (response && response.success) {
         downloadBtn.innerHTML = `
           <div style="display: flex; align-items: center; padding: 8px 16px; color: #065fd4;">
@@ -47,8 +56,17 @@ function addDownloadButton() {
             ${error}
           </div>
         `;
+        console.error('Download error:', error);
       }
-    });
+    } catch (error) {
+      console.error('Failed to start download:', error);
+      downloadBtn.innerHTML = `
+        <div style="display: flex; align-items: center; padding: 8px 16px; color: #cc0000;">
+          <span style="margin-right: 6px;">❌</span>
+          Server error
+        </div>
+      `;
+    }
   });
 
   // Insert button
