@@ -1,8 +1,9 @@
 // Background script for YouTube Video Downloader
-const API_BASE_URL = `https://${location.hostname}`; // This will automatically use the Replit URL
+let API_BASE_URL = '';
 
-// Set up context menu
+// Initialize API URL when extension loads
 chrome.runtime.onInstalled.addListener(() => {
+  // Set up context menu
   chrome.contextMenus.create({
     id: 'downloadVideo',
     title: 'Download Video',
@@ -32,18 +33,31 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // Communication with Flask backend
 async function initiateDownload(videoUrl, options = null) {
   try {
-    console.log('Connecting to server at:', API_BASE_URL);
+    // Get the server URL from the current tab's URL (Replit domain)
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const serverUrl = tab.url.split('://')[0] + '://' + tab.url.split('://')[1].split('/')[0];
+
+    console.log('Attempting to connect to server at:', serverUrl);
 
     // First check if server is available
-    const healthCheck = await fetch(`${API_BASE_URL}/`).catch(() => null);
-    if (!healthCheck?.ok) {
+    const healthCheck = await fetch(serverUrl, {
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+
+    if (!healthCheck.ok) {
       throw new Error('Server is not available. Please ensure the server is running.');
     }
+
+    API_BASE_URL = serverUrl;
+    console.log('Successfully connected to server');
 
     const response = await fetch(`${API_BASE_URL}/download`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json'
       },
       body: JSON.stringify({ 
         url: videoUrl,
