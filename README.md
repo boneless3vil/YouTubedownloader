@@ -15,6 +15,7 @@ A powerful Chrome extension for downloading YouTube videos with advanced quality
 - Real-time download progress tracking
 - Automatic format detection
 - Configurable download settings
+- Comprehensive logging system with debug options
 
 ## Project Structure
 
@@ -58,6 +59,9 @@ A powerful Chrome extension for downloading YouTube videos with advanced quality
 - Comprehensive error logging and handling
 - Support for multiple video formats
 - Cross-platform compatibility tested
+- Detailed logging levels for debugging
+- Configurable log output formats
+- Error tracking and reporting
 
 ## License
 
