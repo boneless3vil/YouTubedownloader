@@ -1,9 +1,8 @@
 // Background script for YouTube Video Downloader
-let API_BASE_URL = 'http://localhost:5000';
+const API_BASE_URL = `https://${location.hostname.replace('chrome-extension://', '')}`;
 
-// Initialize API URL when extension loads
+// Initialize context menu
 chrome.runtime.onInstalled.addListener(() => {
-  // Set up context menu
   chrome.contextMenus.create({
     id: 'downloadVideo',
     title: 'Download Video',
@@ -33,29 +32,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // Communication with Flask backend
 async function initiateDownload(videoUrl, options = null) {
   try {
-    console.log('Attempting to connect to server at:', API_BASE_URL);
-
-    // First check if server is available
-    const healthCheck = await fetch(API_BASE_URL, {
-      headers: { 
-        'Accept': 'application/json',
-        'Origin': chrome.runtime.getURL('')
-      }
-    });
-
-    if (!healthCheck.ok) {
-      throw new Error('Server is not available. Please ensure the server is running.');
-    }
-
-    const healthData = await healthCheck.json();
-    console.log('Server health check response:', healthData);
+    console.log('Connecting to server at:', API_BASE_URL);
 
     const response = await fetch(`${API_BASE_URL}/download`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Origin': chrome.runtime.getURL('')
+        'Accept': 'application/json'
       },
       body: JSON.stringify({ 
         url: videoUrl,
@@ -72,7 +55,7 @@ async function initiateDownload(videoUrl, options = null) {
     if (data.success) {
       chrome.notifications.create({
         type: 'basic',
-        iconUrl: 'icons/icon128.svg',
+        iconUrl: 'icons/icon128.png',
         title: 'Download Started',
         message: 'Your video download has begun.'
       });
@@ -84,7 +67,7 @@ async function initiateDownload(videoUrl, options = null) {
     console.error('Download error:', error);
     chrome.notifications.create({
       type: 'basic',
-      iconUrl: 'icons/icon128.svg',
+      iconUrl: 'icons/icon128.png',
       title: 'Download Failed',
       message: error.message
     });
