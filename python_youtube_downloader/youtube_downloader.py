@@ -156,8 +156,17 @@ class YouTubeDownloader:
                 return json.load(f)
         except Exception as e:
             logger.warning(f"Could not load settings: {e}")
+            # Create downloads directory if it doesn't exist
+            download_path = os.path.join(self.base_path, 'downloads')
+            if not os.path.exists(download_path):
+                try:
+                    os.makedirs(download_path)
+                    logger.info(f"Created downloads directory at: {download_path}")
+                except Exception as e:
+                    logger.error(f"Failed to create downloads directory: {e}")
+            
             return {
-                'download_path': os.path.join(self.base_path, 'downloads'),
+                'download_path': download_path,
                 'default_format': 'mp4',
                 'default_quality': 'highest'
             }

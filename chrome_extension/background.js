@@ -42,17 +42,32 @@ async function initiateDownload(videoUrl, options = null) {
     
     // We're now using a fixed Replit domain, so no need to try to extract it from tabs
 
-    const response = await fetch(`${API_BASE_URL}/download`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({ 
-        url: videoUrl,
-        options: options || await chrome.storage.sync.get(['quality', 'format'])
-      })
+    console.log('Sending request to:', `${API_BASE_URL}/download`);
+    console.log('Request data:', { 
+      url: videoUrl,
+      options: options || await chrome.storage.sync.get(['quality', 'format'])
     });
+    
+    let response;
+    try {
+      response = await fetch(`${API_BASE_URL}/download`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ 
+          url: videoUrl,
+          options: options || await chrome.storage.sync.get(['quality', 'format'])
+        })
+      });
+      
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+    } catch (fetchError) {
+      console.error('Fetch error details:', fetchError);
+      throw fetchError;
+    }
 
     if (!response.ok) {
       throw new Error(`Server error: ${response.status} ${response.statusText}`);

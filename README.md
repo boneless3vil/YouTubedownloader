@@ -2,6 +2,8 @@
 
 A powerful Chrome extension for downloading YouTube videos with advanced quality selection and server integration.
 
+> **NEW**: A standalone packaged version of the YouTube Downloader is now available! See [PACKAGED_VERSION.md](PACKAGED_VERSION.md) for details.
+
 ## Features
 
 - Download YouTube videos directly from your browser
@@ -20,13 +22,21 @@ A powerful Chrome extension for downloading YouTube videos with advanced quality
 ## Project Structure
 
 ```
-├── chrome_extension/        # Chrome extension files
-│   ├── manifest.json       # Extension manifest
-│   ├── background.js       # Background service worker
-│   ├── popup.html         # Extension popup UI
-│   └── popup.js           # Popup functionality
-└── python_youtube_downloader/  # Python backend
-    └── youtube_downloader.py   # Flask server & GUI app
+├── chrome_extension/           # Chrome extension files
+│   ├── manifest.json          # Extension manifest
+│   ├── background.js          # Background service worker
+│   ├── content.js             # YouTube page integration
+│   ├── popup.html             # Extension popup UI
+│   ├── popup.js               # Popup functionality
+│   └── icons/                 # Extension icons
+├── python_youtube_downloader/   # Python backend
+│   ├── youtube_downloader.py  # Flask server & GUI app
+│   ├── build.py               # Packaging script
+│   └── build/                 # Built packages
+│       └── dist/              # Distribution files
+│           └── youtube_downloader.zip  # Packaged app
+├── README.md                    # Main documentation
+└── PACKAGED_VERSION.md          # Packaged version guide
 ```
 
 ## Setup Instructions
