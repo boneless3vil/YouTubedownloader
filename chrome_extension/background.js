@@ -1,5 +1,5 @@
 // Background script for YouTube Video Downloader
-let API_BASE_URL = '';
+let API_BASE_URL = 'https://c7e3527c-9b59-475f-8856-affe57bb56d4-00-dh76pl2gg5f1.worf.replit.dev';
 
 // Initialize context menu and server URL
 chrome.runtime.onInstalled.addListener(() => {
@@ -10,8 +10,6 @@ chrome.runtime.onInstalled.addListener(() => {
     documentUrlPatterns: ['*://*.youtube.com/*']
   });
 
-  // Get server URL from the Replit domain
-  API_BASE_URL = 'https://' + chrome.runtime.id + '.replit.app';
   console.log('Initial server URL:', API_BASE_URL);
 });
 
@@ -41,15 +39,8 @@ async function initiateDownload(videoUrl, options = null) {
   try {
     console.log('Current API URL:', API_BASE_URL);
     console.log('Attempting download for:', videoUrl);
-
-    // Get active tab URL to determine Replit domain
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (tab && tab.url.includes('replit.app')) {
-      // Extract Replit domain from active tab
-      const replitDomain = new URL(tab.url).origin;
-      API_BASE_URL = replitDomain;
-      console.log('Updated server URL to:', API_BASE_URL);
-    }
+    
+    // We're now using a fixed Replit domain, so no need to try to extract it from tabs
 
     const response = await fetch(`${API_BASE_URL}/download`, {
       method: 'POST',
