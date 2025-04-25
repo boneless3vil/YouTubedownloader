@@ -64,7 +64,7 @@ async function initiateDownload(videoUrl, options = null) {
     if (data.success) {
       chrome.notifications.create({
         type: 'basic',
-        iconUrl: '/icons/icon128.png',
+        iconUrl: 'icons/icon128.png',
         title: 'Download Started',
         message: 'Your video download has begun.'
       });
@@ -76,7 +76,7 @@ async function initiateDownload(videoUrl, options = null) {
     console.error('Download failed:', error);
     chrome.notifications.create({
       type: 'basic',
-      iconUrl: '/icons/icon128.png',
+      iconUrl: 'icons/icon128.png',
       title: 'Download Failed',
       message: error.message
     });

@@ -15,10 +15,16 @@ function addDownloadButton() {
   const downloadBtn = document.createElement('button');
   downloadBtn.id = 'yt-downloader-btn';
   downloadBtn.className = 'yt-downloader-btn';
+  // Apply YouTube style button
+  downloadBtn.style.background = 'none';
+  downloadBtn.style.border = 'none';
+  downloadBtn.style.cursor = 'pointer';
+  downloadBtn.style.padding = '0';
+  downloadBtn.style.margin = '0 8px';
   downloadBtn.innerHTML = `
-    <div style="display: flex; align-items: center; padding: 8px 16px; cursor: pointer; color: #065fd4;">
+    <div style="display: flex; align-items: center; padding: 8px 16px; cursor: pointer; color: #065fd4; font-family: 'Roboto', Arial, sans-serif; font-weight: 500; font-size: 14px;">
       <span style="margin-right: 6px;">⬇️</span>
-      Download
+      Start
     </div>
   `;
 
@@ -26,7 +32,7 @@ function addDownloadButton() {
   downloadBtn.addEventListener('click', async () => {
     try {
       downloadBtn.innerHTML = `
-        <div style="display: flex; align-items: center; padding: 8px 16px; color: #666;">
+        <div style="display: flex; align-items: center; padding: 8px 16px; color: #666; font-family: 'Roboto', Arial, sans-serif; font-weight: 500; font-size: 14px;">
           <span style="margin-right: 6px;">⏳</span>
           Starting...
         </div>
@@ -43,7 +49,7 @@ function addDownloadButton() {
 
       if (response && response.success) {
         downloadBtn.innerHTML = `
-          <div style="display: flex; align-items: center; padding: 8px 16px; color: #065fd4;">
+          <div style="display: flex; align-items: center; padding: 8px 16px; color: #065fd4; font-family: 'Roboto', Arial, sans-serif; font-weight: 500; font-size: 14px;">
             <span style="margin-right: 6px;">✅</span>
             Download Started
           </div>
@@ -51,7 +57,7 @@ function addDownloadButton() {
       } else {
         const error = response ? response.error : 'Download failed';
         downloadBtn.innerHTML = `
-          <div style="display: flex; align-items: center; padding: 8px 16px; color: #cc0000;">
+          <div style="display: flex; align-items: center; padding: 8px 16px; color: #cc0000; font-family: 'Roboto', Arial, sans-serif; font-weight: 500; font-size: 14px;">
             <span style="margin-right: 6px;">❌</span>
             ${error}
           </div>
@@ -61,7 +67,7 @@ function addDownloadButton() {
     } catch (error) {
       console.error('Failed to start download:', error);
       downloadBtn.innerHTML = `
-        <div style="display: flex; align-items: center; padding: 8px 16px; color: #cc0000;">
+        <div style="display: flex; align-items: center; padding: 8px 16px; color: #cc0000; font-family: 'Roboto', Arial, sans-serif; font-weight: 500; font-size: 14px;">
           <span style="margin-right: 6px;">❌</span>
           Server error
         </div>
