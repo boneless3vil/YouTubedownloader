@@ -3,6 +3,7 @@ from tkinter import ttk, messagebox, filedialog
 import yt_dlp
 import os
 import json
+import re
 import threading
 import sys
 import logging
@@ -185,6 +186,37 @@ class YouTubeDownloader:
         self.add_context_menu(self.url_entry)
         self.check_clipboard()
 
+        # Enter in the URL field starts the format search
+        self.url_entry.bind('<Return>', lambda e: self.prepare_download())
+
+        # Auto-fetch formats when a complete YouTube URL lands in the field
+        # (paste or typing). The trace is installed after check_clipboard so
+        # a URL auto-filled from the clipboard at startup doesn't pop a
+        # dialog before the user has done anything.
+        self._auto_fetch_job = None
+        self._last_fetched_url = self.url_var.get().strip()
+        self.url_var.trace_add('write', self._schedule_auto_fetch)
+
+    # Matches only complete video/shorts/playlist URLs so auto-fetch doesn't
+    # fire on a half-typed address
+    AUTO_FETCH_RE = re.compile(
+        r'(youtube\.com/watch\?\S*v=[\w-]{11}'
+        r'|youtu\.be/[\w-]{11}'
+        r'|youtube\.com/shorts/[\w-]{11}'
+        r'|youtube\.com/playlist\?\S*list=[\w-]+)'
+    )
+
+    def _schedule_auto_fetch(self, *_):
+        if self._auto_fetch_job is not None:
+            self.root.after_cancel(self._auto_fetch_job)
+        self._auto_fetch_job = self.root.after(700, self._auto_fetch)
+
+    def _auto_fetch(self):
+        self._auto_fetch_job = None
+        url = self.url_var.get().strip()
+        if url and url != self._last_fetched_url and self.AUTO_FETCH_RE.search(url):
+            self.prepare_download()
+
     def create_download_options(self):
         download_frame = ttk.LabelFrame(self.main_frame, text="Download Options", padding="10")
         download_frame.pack(fill=tk.X, pady=10)
@@ -279,6 +311,10 @@ class YouTubeDownloader:
         if not ('youtube.com' in url or 'youtu.be' in url):
             messagebox.showerror("Error", "Invalid YouTube URL format")
             return
+
+        # Remember what we fetched so the auto-fetch trace doesn't fire a
+        # second search for the same URL
+        self._last_fetched_url = url
 
         # Clean up playlist URL if present
         if 'playlist' in url:
