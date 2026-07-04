@@ -4,6 +4,22 @@ This project provides two implementations of a YouTube video downloader:
 1. A desktop application built with Python and Tkinter
 2. A Chrome extension for in-browser downloads
 
+The two work together: the desktop app includes a small local API server
+(`http://127.0.0.1:5000`, this machine only) that the Chrome extension sends
+download requests to. The extension therefore requires the desktop app to be
+installed and running; there is no separate server component.
+
+## Getting started
+
+```bash
+cd python_youtube_downloader
+python install.py
+```
+
+The interactive installer sets up everything needed at runtime (Python
+packages, ffmpeg, Deno, download folder, launcher) and can optionally walk
+you through installing the Chrome extension.
+
 ## Project Structure
 
 ```

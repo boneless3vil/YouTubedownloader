@@ -52,14 +52,19 @@
 
 ## Requirements
 
-- Make sure the Python server is running (`youtube_downloader.py`)
-- The server must be accessible at `http://localhost:5000`
-- Chrome browser must be able to connect to localhost
+- The desktop application must be installed and running. The extension's
+  server is **built into the desktop app** — starting `youtube_downloader.py`
+  (or `YouTube Downloader.bat`) also starts the API the extension talks to
+  at `http://localhost:5000`. There is nothing separate to install or run.
+- To install the desktop app, run `python install.py` in the
+  `python_youtube_downloader` folder — the installer can also open this
+  extension setup for you.
 
 ## Troubleshooting
 
 If the extension doesn't work:
-1. Check if Python server is running
+1. Check that the desktop app is running (visit http://localhost:5000 in
+   your browser — it should reply that the API is active)
 2. Verify the extension is enabled in Chrome
 3. Try refreshing the YouTube page
 4. Check Chrome's console for any error messages

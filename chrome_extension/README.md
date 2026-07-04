@@ -12,50 +12,46 @@ A convenient Chrome extension that adds one-click video download capabilities to
 - Seamless browser integration
 - Configurable default settings
 
+## How it works
+
+The extension does not download videos by itself — it sends the video URL to
+the desktop application, which does the downloading. The desktop app has a
+small server **built in** at `http://localhost:5000` (local machine only);
+starting the app starts the server, so there is nothing separate to install.
+The desktop app must be running for the extension to work, and files are
+saved by the desktop app to your Downloads folder.
+
 ## Installation
 
-### From Source (Developer Mode)
-1. Open Chrome and navigate to `chrome://extensions/`
-2. Enable "Developer mode" using the toggle in the top right
-3. Click "Load unpacked" and select this directory
-4. The extension icon should appear in your Chrome toolbar
-
-### Using Chrome Web Store
-*(Coming soon)*
+1. Install the desktop application first: run `python install.py` in the
+   `python_youtube_downloader` folder (the installer offers to open this
+   extension setup for you). See [INSTALL.md](INSTALL.md) for full steps.
+2. Open Chrome and navigate to `chrome://extensions/`
+3. Enable "Developer mode" using the toggle in the top right
+4. Click "Load unpacked" and select this directory
+5. The extension icon should appear in your Chrome toolbar
 
 ## Usage
 
-1. Click the extension icon on any YouTube video page
-2. First time setup:
-   - Configure your preferred video quality
-   - Choose default format (Video+Audio, Video Only, Audio Only)
-   - Set download location preferences
-3. For subsequent uses:
-   - Simply click the download button that appears on YouTube pages
-   - The video will download using your preset preferences
+1. Make sure the desktop application is running
+2. Open any YouTube video page
+3. Click the extension icon — the video downloads using your saved preferences
 
 ## Configuration
 
-The extension can be configured through the popup menu:
+Right-click the extension icon to set your preferences (saved and synced by
+Chrome):
 
-### Download Settings
-- Video Quality (Auto, High, Medium, Low)
-- Format Preference (MP4, WebM, etc.)
-- Audio Quality for audio-only downloads
-- Default Download Type (Video+Audio, Video Only, Audio Only)
-
-### Interface Settings
-- Show download button on video pages
-- Enable notifications
-- Display download progress
+- Download Type: Video + Audio, Video Only, or Audio Only
+- Quality: High, Medium, or Low
 
 ## Permissions
 
 This extension requires the following permissions:
 - Storage (for saving preferences)
-- ActiveTab (for accessing video information)
-- Downloads (for saving videos)
-- Host permissions for YouTube.com
+- ActiveTab / Scripting (for reading the current video URL)
+- Context Menus (for the right-click preferences menu)
+- Host permissions for youtube.com and `http://localhost:5000` (the desktop app's API)
 
 ## Development
 

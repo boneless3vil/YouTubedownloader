@@ -21,45 +21,48 @@ A feature-rich YouTube downloader with a graphical user interface that allows yo
 ## Requirements
 
 - Python 3.11 or later
-- pip (Python package manager)
+- ffmpeg — required to merge video+audio and to convert audio-only downloads to MP3
+- Deno (recommended) — yt-dlp uses it to run YouTube's player JavaScript; without it some formats are missing
 - Windows, Linux, or macOS
 
 ## Installation
 
-### Quick Start
+Run the interactive installer from this directory:
 
-1. Clone or download this repository
-2. Open terminal/command prompt in the project directory
-3. Run the installation script:
 ```bash
 python install.py
 ```
+
+It walks you through everything needed at runtime:
+
+1. Checks your Python version
+2. Creates a virtual environment (`.venv`) and installs the Python packages into it
+3. Checks for ffmpeg and Deno, and offers to install them (via winget on Windows)
+4. Asks where downloads should be saved (writes `settings.json`)
+5. Creates `YouTube Downloader.bat` and an optional desktop shortcut (Windows)
+6. Optionally helps you install the Chrome extension
+
+Every prompt has a sensible default — pressing Enter through the installer gives a working setup.
 
 ### Manual Installation
 
 If you prefer to set up manually:
 
-1. Create a virtual environment:
 ```bash
+python -m venv .venv
 # Windows
-python -m venv yt-venv
-.\yt-venv\Scripts\activate
-
+.venv\Scripts\pip install yt-dlp pyperclip flask flask-cors
 # Linux/Mac
-python -m venv yt-venv
-source yt-venv/bin/activate
+.venv/bin/pip install yt-dlp pyperclip flask flask-cors
 ```
 
-2. Install required packages:
-```bash
-pip install yt-dlp pyperclip
-```
+Then install ffmpeg (and ideally Deno) with your system's package manager.
 
 ## Usage
 
-1. Start the application:
+1. Start the application — double-click `YouTube Downloader.bat` (Windows), or run:
 ```bash
-python youtube_downloader.py
+.venv\Scripts\python youtube_downloader.py
 ```
 
 2. Basic Video Download:
@@ -86,6 +89,21 @@ python youtube_downloader.py
 5. History:
    - Click "History" to view past downloads
    - Includes timestamp, format, and status
+
+## Built-in server for the Chrome extension
+
+The desktop app doubles as the backend for the companion Chrome extension —
+there is no separate server to install or run. When the app starts, it also
+starts a small API on `http://127.0.0.1:5000` (reachable only from this
+machine). The extension sends the video URL and your preferences there, and
+the desktop app performs the download.
+
+- `GET /` — health check; the extension's downloads work only while the app is running
+- `POST /api/download` — starts a download (`{"url": ..., "settings": {"downloadType": ..., "quality": ...}}`)
+
+API downloads are saved to your `~/Downloads` folder. See
+[chrome_extension/INSTALL.md](../chrome_extension/INSTALL.md) for installing
+the extension itself.
 
 ## Troubleshooting
 
