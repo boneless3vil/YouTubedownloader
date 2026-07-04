@@ -48,6 +48,47 @@ def get_base_path():
         logger.error(f"Error in get_base_path: {str(e)}", exc_info=True)
         raise
 
+DEFAULT_SETTINGS = {
+    # Final destination for finished downloads
+    "download_path": os.path.join(os.path.expanduser("~"), "Downloads"),
+    # Source/staging folder for in-progress downloads; "" = download
+    # directly into the destination
+    "temp_path": "",
+    "default_download_type": "video+audio",
+    "format": "mp4",
+}
+
+
+def load_settings(base_path):
+    """Read settings.json, falling back to defaults for missing/invalid values.
+
+    Shared by the GUI and the extension API so both honor the same folders.
+    """
+    settings = dict(DEFAULT_SETTINGS)
+    try:
+        settings_path = os.path.join(base_path, "settings.json")
+        if os.path.exists(settings_path):
+            with open(settings_path, "r") as f:
+                settings.update(json.load(f))
+        # Fall back to defaults if saved paths don't exist (e.g. a settings
+        # file created on another machine/OS)
+        if not os.path.isdir(settings.get("download_path", "")):
+            settings["download_path"] = DEFAULT_SETTINGS["download_path"]
+        if settings.get("temp_path") and not os.path.isdir(settings["temp_path"]):
+            settings["temp_path"] = ""
+    except Exception:
+        return dict(DEFAULT_SETTINGS)
+    return settings
+
+
+def build_download_paths(settings):
+    """yt-dlp 'paths' dict: partial files go to temp, finished files to home."""
+    paths = {"home": settings["download_path"]}
+    if settings.get("temp_path"):
+        paths["temp"] = settings["temp_path"]
+    return paths
+
+
 class FormatSelector(tk.Toplevel):
     def __init__(self, parent, formats):
         self.selected_format = None
@@ -149,6 +190,11 @@ class YouTubeDownloader:
     def setup_gui(self):
         try:
             logger.debug("Setting up GUI components")
+            # Settings are loaded first so widgets can pick up saved defaults
+            self.base_path = get_base_path()
+            self.settings = self.load_settings()
+            self.set_window_icon()
+
             # Configure button style
             self.style = ttk.Style()
             self.style.configure("TButton", padding=5, width=10)
@@ -159,19 +205,39 @@ class YouTubeDownloader:
             self.main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
             # Create and pack all GUI elements
+            self.create_menubar()
             self.create_url_frame()
             self.create_download_options()
             self.create_playlist_options()
             self.create_progress_frame()
             self.create_button_frame()
-
-            # Base path for resources
-            self.base_path = get_base_path()
-            self.settings = self.load_settings()
             logger.debug("GUI setup completed successfully")
         except Exception as e:
             logger.error(f"Error in setup_gui: {str(e)}", exc_info=True)
             raise
+
+    def set_window_icon(self):
+        # icon.ico sits next to the script in development; PyInstaller unpacks
+        # bundled data files into sys._MEIPASS
+        candidates = [os.path.join(self.base_path, "icon.ico")]
+        if getattr(sys, 'frozen', False):
+            candidates.insert(0, os.path.join(sys._MEIPASS, "icon.ico"))
+        for icon_path in candidates:
+            if os.path.exists(icon_path):
+                try:
+                    self.root.iconbitmap(icon_path)
+                except tk.TclError:
+                    logger.warning(f"Could not apply window icon {icon_path}")
+                return
+
+    def create_menubar(self):
+        menubar = tk.Menu(self.root, tearoff=0)
+        file_menu = tk.Menu(menubar, tearoff=0)
+        file_menu.add_command(label="Settings...", command=self.show_settings)
+        file_menu.add_separator()
+        file_menu.add_command(label="Exit", command=self.root.destroy)
+        menubar.add_cascade(label="File", menu=file_menu)
+        self.root.config(menu=menubar)
 
     def create_url_frame(self):
         # URL Frame with validation
@@ -221,7 +287,10 @@ class YouTubeDownloader:
         download_frame = ttk.LabelFrame(self.main_frame, text="Download Options", padding="10")
         download_frame.pack(fill=tk.X, pady=10)
 
-        self.download_type = tk.StringVar(value="video+audio")
+        saved_type = self.settings.get("default_download_type", "video+audio")
+        if saved_type not in ("video+audio", "video-only", "audio-only"):
+            saved_type = "video+audio"
+        self.download_type = tk.StringVar(value=saved_type)
         ttk.Radiobutton(download_frame, text="Video + Audio", value="video+audio", 
                        variable=self.download_type).pack(side=tk.LEFT, padx=10)
         ttk.Radiobutton(download_frame, text="Video Only", value="video-only", 
@@ -408,7 +477,8 @@ class YouTubeDownloader:
         outtmpl = '%(playlist_index)s-%(title)s.%(ext)s' if is_playlist else '%(title)s.%(ext)s'
 
         ydl_opts = {
-            'outtmpl': os.path.join(self.settings['download_path'], outtmpl),
+            'outtmpl': outtmpl,
+            'paths': build_download_paths(self.settings),
             'progress_hooks': [self.download_progress_hook],
             'ignoreerrors': True
         }
@@ -488,28 +558,25 @@ class YouTubeDownloader:
                 pass
 
     def load_settings(self):
-        default_settings = {
-            "download_path": os.path.join(os.path.expanduser("~"), "Downloads"),
-            "format": "mp4"
-        }
-        try:
-            settings_path = os.path.join(self.base_path, "settings.json")
-            if os.path.exists(settings_path):
-                with open(settings_path, "r") as f:
-                    settings = {**default_settings, **json.load(f)}
-                # Fall back to the default if the saved path doesn't exist
-                # (e.g. a settings file created on another machine/OS)
-                if not os.path.isdir(settings.get("download_path", "")):
-                    settings["download_path"] = default_settings["download_path"]
-                return settings
-            return default_settings
-        except:
-            return default_settings
+        return load_settings(self.base_path)
 
-    def save_settings(self, path_var, format_var, settings_window):
-        self.settings["download_path"] = path_var.get()
+    def save_settings(self, source_var, dest_var, type_var, format_var, settings_window):
+        source = source_var.get().strip()
+        dest = dest_var.get().strip()
+        if not os.path.isdir(dest):
+            messagebox.showerror("Error", f"Destination folder does not exist:\n{dest}")
+            return
+        if source and not os.path.isdir(source):
+            messagebox.showerror("Error", f"Source folder does not exist:\n{source}")
+            return
+
+        self.settings["temp_path"] = source
+        self.settings["download_path"] = dest
+        self.settings["default_download_type"] = type_var.get()
         self.settings["format"] = format_var.get()
         self.save_settings_file()
+        # Apply the new default to the main window immediately
+        self.download_type.set(type_var.get())
         settings_window.destroy()
         messagebox.showinfo("Success", "Settings saved!")
 
@@ -529,26 +596,42 @@ class YouTubeDownloader:
     def show_settings(self):
         settings_window = tk.Toplevel(self.root)
         settings_window.title("Settings")
-        settings_window.geometry("400x120")  
-        settings_window.resizable(False, False)  
+        settings_window.geometry("520x230")
+        settings_window.resizable(False, False)
 
-        settings_frame = ttk.Frame(settings_window, padding="3")
+        settings_frame = ttk.Frame(settings_window, padding="10")
         settings_frame.pack(fill=tk.BOTH, expand=True)
 
-        path_frame = ttk.Frame(settings_frame)
-        path_frame.pack(fill=tk.X, pady=2)
-        ttk.Label(path_frame, text="Download Path:").pack(side=tk.LEFT)
-        path_var = tk.StringVar(value=self.settings["download_path"])
-        path_entry = ttk.Entry(path_frame, textvariable=path_var)
-        path_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+        def folder_row(label, value):
+            row = ttk.Frame(settings_frame)
+            row.pack(fill=tk.X, pady=3)
+            ttk.Label(row, text=label, width=22).pack(side=tk.LEFT)
+            var = tk.StringVar(value=value)
+            entry = ttk.Entry(row, textvariable=var)
+            entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+            self.add_context_menu(entry)
+            ttk.Button(row, text="Browse",
+                       command=lambda: self.browse_path(var)).pack(side=tk.RIGHT)
+            return var
 
-        self.add_context_menu(path_entry)
+        # Source folder holds in-progress downloads; finished files are moved
+        # to the destination. Leave source empty to download directly.
+        source_var = folder_row("Source (in-progress):", self.settings.get("temp_path", ""))
+        dest_var = folder_row("Destination (finished):", self.settings["download_path"])
 
-        ttk.Button(path_frame, text="Browse", command=lambda: self.browse_path(path_var)).pack(side=tk.RIGHT)
+        type_frame = ttk.Frame(settings_frame)
+        type_frame.pack(fill=tk.X, pady=3)
+        ttk.Label(type_frame, text="Default download:", width=22).pack(side=tk.LEFT)
+        type_var = tk.StringVar(value=self.download_type.get())
+        for text, value in (("Video + Audio", "video+audio"),
+                            ("Video Only", "video-only"),
+                            ("Audio Only", "audio-only")):
+            ttk.Radiobutton(type_frame, text=text, value=value,
+                            variable=type_var).pack(side=tk.LEFT, padx=4)
 
         format_frame = ttk.Frame(settings_frame)
-        format_frame.pack(fill=tk.X, pady=5)
-        ttk.Label(format_frame, text="Format:").pack(side=tk.LEFT)
+        format_frame.pack(fill=tk.X, pady=3)
+        ttk.Label(format_frame, text="Format:", width=22).pack(side=tk.LEFT)
         format_var = tk.StringVar(value=self.settings["format"])
         format_entry = ttk.Entry(format_frame, textvariable=format_var, width=10)
         format_entry.pack(side=tk.LEFT, padx=5)
@@ -556,11 +639,14 @@ class YouTubeDownloader:
         self.add_context_menu(format_entry)
 
         save_frame = ttk.Frame(settings_frame)
-        save_frame.pack(fill=tk.X, pady=5)
-        ttk.Button(save_frame, text="Save", command=lambda: self.save_settings(path_var, format_var, settings_window)).pack()
+        save_frame.pack(fill=tk.X, pady=10)
+        ttk.Button(save_frame, text="Save",
+                   command=lambda: self.save_settings(source_var, dest_var, type_var,
+                                                      format_var, settings_window)).pack()
 
     def browse_path(self, path_var):
-        path = filedialog.askdirectory(initialdir=self.settings["download_path"])
+        path = filedialog.askdirectory(
+            initialdir=path_var.get() or self.settings["download_path"])
         if path:
             path_var.set(path)
 
@@ -672,10 +758,13 @@ def api_download():
 
             logger.info(f"Selected format: {selected_format}")
 
-            # Configure download options
+            # Configure download options - honor the folders configured in
+            # the desktop app's Settings
+            app_settings = load_settings(get_base_path())
             ydl_opts = {
                 'format': selected_format,
-                'outtmpl': os.path.join(os.path.expanduser("~"), "Downloads", "%(title)s.%(ext)s")
+                'outtmpl': '%(title)s.%(ext)s',
+                'paths': build_download_paths(app_settings),
             }
 
             # Start download in background thread

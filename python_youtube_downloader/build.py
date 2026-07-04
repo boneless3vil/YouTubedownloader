@@ -108,9 +108,11 @@ if os.name == 'nt':  # Windows-specific initialization
         '--noupx',  # More reliable than UPX compression
     ]
 
-    # Add icon if available
+    # Add icon if available: --icon sets the .exe file's icon, --add-data
+    # ships the .ico so the app can also use it as the window icon at runtime
     if os.path.exists("icon.ico"):
         options.append('--icon=icon.ico')
+        options.append('--add-data=icon.ico;.')
 
     try:
         print("\nStarting PyInstaller build process...")

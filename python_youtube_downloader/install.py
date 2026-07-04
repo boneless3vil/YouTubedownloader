@@ -129,7 +129,10 @@ def step_settings():
                              current.get("download_path", default_path))
     os.makedirs(download_path, exist_ok=True)
 
-    settings = {"download_path": download_path,
+    # Merge over existing settings so keys managed in the app's Settings
+    # dialog (source folder, default download type, ...) survive a re-install
+    settings = {**current,
+                "download_path": download_path,
                 "format": current.get("format", "mp4")}
     with open(settings_path, "w") as f:
         json.dump(settings, f, indent=2)
