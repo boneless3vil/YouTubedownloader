@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
   // Load saved settings
   chrome.storage.sync.get({
-    downloadType: 'video+audio',
+    downloadType: 'video-audio',
     quality: 'highest',
     format: 'mp4'
   }, function(items) {

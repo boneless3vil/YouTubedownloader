@@ -49,6 +49,7 @@ def get_base_path():
 
 class FormatSelector(tk.Toplevel):
     def __init__(self, parent, formats):
+        self.selected_format = None
         try:
             super().__init__(parent)
             self.title("Select Format")
@@ -58,7 +59,6 @@ class FormatSelector(tk.Toplevel):
             if not formats:
                 ttk.Label(self, text="No suitable formats found for this download type.").pack(pady=20)
                 ttk.Button(self, text="Close", command=self.destroy).pack(pady=10)
-                self.selected_format = None
                 return
 
             main_frame = ttk.Frame(self)
@@ -114,7 +114,6 @@ class FormatSelector(tk.Toplevel):
 
             self.tree.bind('<Double-1>', lambda e: self.select_format())
 
-            self.selected_format = None
             self.grab_set()
         except Exception as e:
             logger.error(f"Error in FormatSelector initialization: {str(e)}", exc_info=True)
@@ -303,16 +302,18 @@ class YouTubeDownloader:
                 info = ydl.extract_info(url, download=False)
 
                 # Check if URL is a playlist
-                self.is_playlist.set('entries' in info)
-                if self.is_playlist.get():
+                is_playlist = 'entries' in info
+                self.root.after(0, self.is_playlist.set, is_playlist)
+                if is_playlist:
                     self.playlist_info = info
                     # For playlists, use the first video's formats
                     formats = info['entries'][0]['formats'] if info['entries'] else []
 
                     # Update status with playlist info
                     playlist_count = len(info['entries'])
-                    self.status_var.set(f"Playlist detected: {playlist_count} videos")
+                    self.root.after(0, self.status_var.set, f"Playlist detected: {playlist_count} videos")
                 else:
+                    self.playlist_info = None
                     formats = info['formats']
 
                 # Filter and sort formats based on download type
@@ -349,8 +350,9 @@ class YouTubeDownloader:
                 self.root.after(0, lambda: self.show_format_selector(formats, url))
 
         except Exception as e:
-            self.root.after(0, lambda: messagebox.showerror("Error", f"Failed to fetch formats: {str(e)}"))
-            self.status_var.set("Ready")
+            error_msg = str(e)
+            self.root.after(0, lambda: messagebox.showerror("Error", f"Failed to fetch formats: {error_msg}"))
+            self.root.after(0, self.status_var.set, "Ready")
 
     def show_format_selector(self, formats, url):
         selector = FormatSelector(self.root, formats)
@@ -361,16 +363,21 @@ class YouTubeDownloader:
             self.status_var.set("Download cancelled")
 
     def start_download(self, url, format_id):
-        format_id = str(format_id)  
+        format_id = str(format_id)
         download_type = self.download_type.get()
+        is_playlist = self.is_playlist.get() and self.playlist_info
+
+        # Only prefix filenames with the playlist index for playlist downloads;
+        # for single videos %(playlist_index)s expands to "NA"
+        outtmpl = '%(playlist_index)s-%(title)s.%(ext)s' if is_playlist else '%(title)s.%(ext)s'
 
         ydl_opts = {
-            'outtmpl': os.path.join(self.settings['download_path'], '%(playlist_index)s-%(title)s.%(ext)s'),
+            'outtmpl': os.path.join(self.settings['download_path'], outtmpl),
             'progress_hooks': [self.download_progress_hook],
-            'ignoreerrors': True  
+            'ignoreerrors': True
         }
 
-        if self.is_playlist.get() and self.playlist_info:
+        if is_playlist:
             # Add playlist-specific options
             if not self.download_all.get():
                 try:
@@ -382,8 +389,10 @@ class YouTubeDownloader:
                     if end is not None and start is not None and end < start:
                         raise ValueError("End index must be greater than start index")
 
-                    ydl_opts['playliststart'] = start
-                    ydl_opts['playlistend'] = end
+                    if start is not None:
+                        ydl_opts['playliststart'] = start
+                    if end is not None:
+                        ydl_opts['playlistend'] = end
                 except ValueError as e:
                     messagebox.showerror("Error", str(e))
                     return
@@ -407,25 +416,27 @@ class YouTubeDownloader:
                 }]
             })
 
+        playlist_suffix = " (Playlist)" if is_playlist else ""
+
         def download_thread():
             try:
-                self.status_var.set("Downloading..." + (" (Playlist)" if self.is_playlist.get() else ""))
+                self.root.after(0, self.status_var.set, "Downloading..." + playlist_suffix)
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                     error_code = ydl.download([url])
                     if error_code != 0:
                         raise Exception("Download failed with non-zero exit code")
 
-                self.status_var.set("Download completed!")
-                self.progress_var.set(100)
-                self.log_download(url, f"{download_type}:{format_id}", "Success" + (" (Playlist)" if self.is_playlist.get() else ""))
-                messagebox.showinfo("Success", "Download completed!")
+                self.root.after(0, self.status_var.set, "Download completed!")
+                self.root.after(0, self.progress_var.set, 100)
+                self.log_download(url, f"{download_type}:{format_id}", "Success" + playlist_suffix)
+                self.root.after(0, lambda: messagebox.showinfo("Success", "Download completed!"))
             except Exception as e:
-                self.status_var.set("Download failed!")
                 error_msg = str(e)
+                self.root.after(0, self.status_var.set, "Download failed!")
                 self.log_download(url, f"{download_type}:{format_id}", f"Failed: {error_msg}")
-                messagebox.showerror("Error", f"Download failed: {error_msg}")
+                self.root.after(0, lambda: messagebox.showerror("Error", f"Download failed: {error_msg}"))
             finally:
-                self.progress_var.set(0)
+                self.root.after(0, self.progress_var.set, 0)
 
         threading.Thread(target=download_thread, daemon=True).start()
 
@@ -436,8 +447,7 @@ class YouTubeDownloader:
                 downloaded = d.get('downloaded_bytes', 0)
                 if total > 0:
                     progress = (downloaded / total) * 100
-                    self.progress_var.set(progress)
-                    self.root.update_idletasks()
+                    self.root.after(0, self.progress_var.set, progress)
             except:
                 pass
 
@@ -450,7 +460,12 @@ class YouTubeDownloader:
             settings_path = os.path.join(self.base_path, "settings.json")
             if os.path.exists(settings_path):
                 with open(settings_path, "r") as f:
-                    return {**default_settings, **json.load(f)}
+                    settings = {**default_settings, **json.load(f)}
+                # Fall back to the default if the saved path doesn't exist
+                # (e.g. a settings file created on another machine/OS)
+                if not os.path.isdir(settings.get("download_path", "")):
+                    settings["download_path"] = default_settings["download_path"]
+                return settings
             return default_settings
         except:
             return default_settings
@@ -582,6 +597,8 @@ def api_download():
 
             # Filter formats based on settings
             download_type = settings.get('downloadType', 'video-audio')
+            if download_type == 'video+audio':  # popup uses this spelling
+                download_type = 'video-audio'
             quality = settings.get('quality', 'highest')
 
             if download_type == "video-audio":
@@ -606,8 +623,11 @@ def api_download():
                     'error': f'No formats found for type: {download_type}'
                 }), 400
 
-            # Sort formats by quality
-            formats.sort(key=lambda x: int(x.get('height', 0) or 0), reverse=True)
+            # Sort formats by quality (audio formats have no height, use bitrate)
+            if download_type == "audio-only":
+                formats.sort(key=lambda x: float(x.get('abr', 0) or 0), reverse=True)
+            else:
+                formats.sort(key=lambda x: int(x.get('height', 0) or 0), reverse=True)
 
             # Select format based on quality preference
             if quality == 'highest':
@@ -642,7 +662,9 @@ def api_download():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 def run_flask():
-    flask_app.run(host='0.0.0.0', port=5000)
+    # Bind to localhost only: the API is meant for the local Chrome extension,
+    # exposing it on all interfaces would let anyone on the network trigger downloads
+    flask_app.run(host='127.0.0.1', port=5000)
 
 def main():
     logger.info("Starting YouTube Downloader application")
