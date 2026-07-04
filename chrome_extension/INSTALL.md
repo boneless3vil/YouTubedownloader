@@ -11,9 +11,9 @@
      ├── background.js
      ├── content.js
      ├── icons/
-     │   ├── icon16.svg
-     │   ├── icon48.svg
-     │   └── icon128.svg
+     │   ├── icon16.png
+     │   ├── icon48.png
+     │   └── icon128.png
      ```
 
 2. Open Chrome Extensions Page:

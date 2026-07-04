@@ -13,7 +13,6 @@ def check_windows_environment():
         print("\nBuild requirements on Windows:")
         print("1. Python 3.11 or higher")
         print("2. Visual Studio Build Tools with C++ components")
-        print("3. Administrator privileges")
         sys.exit(1)
 
 def create_default_settings():
@@ -105,7 +104,6 @@ if os.name == 'nt':  # Windows-specific initialization
         '--collect-all=pyperclip',
         '--runtime-hook=runtime-hook.py',
         '--clean',
-        '--uac-admin',  # Request admin rights
         '--disable-windowed-traceback',
         '--noupx',  # More reliable than UPX compression
     ]
@@ -125,10 +123,9 @@ if os.name == 'nt':  # Windows-specific initialization
             print(f"\nBuild completed successfully!")
             print(f"Windows executable created at: {exe_path}")
             print("\nImportant notes for Windows users:")
-            print("1. The executable must be run with administrator privileges")
-            print("2. Keep the executable in a path without spaces")
-            print("3. Some antivirus software may need to be temporarily disabled during first run")
-            print("4. Make sure all Visual C++ redistributables are installed")
+            print("1. Keep the executable in a path without spaces")
+            print("2. Some antivirus software may flag the executable on first run")
+            print("3. Make sure all Visual C++ redistributables are installed")
         else:
             raise FileNotFoundError("Windows executable not found after build")
 
@@ -138,9 +135,8 @@ if os.name == 'nt':  # Windows-specific initialization
         print("1. Ensure all dependencies are installed (pip install pyinstaller yt-dlp pyperclip)")
         print("2. Install Visual C++ Redistributable for Visual Studio 2015-2022")
         print("3. Run from a directory path without spaces")
-        print("4. Try running as administrator")
-        print("5. Temporarily disable antivirus software")
-        print("6. Clear the build and dist folders before rebuilding")
+        print("4. Temporarily disable antivirus software")
+        print("5. Clear the build and dist folders before rebuilding")
         sys.exit(1)
 
 if __name__ == "__main__":

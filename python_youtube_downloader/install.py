@@ -34,7 +34,6 @@ def create_virtual_environment():
             print("2. Run: python build.py")
             print("\nRequirements for Windows build:")
             print("- Visual Studio Build Tools with C++ components")
-            print("- Administrator privileges")
         else:
             print("\nTo activate the virtual environment on Linux/Mac:")
             print("  source yt-venv/bin/activate")

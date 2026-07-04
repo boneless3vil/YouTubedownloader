@@ -8,7 +8,6 @@ A user-friendly YouTube video downloader with a graphical interface, packaged as
 - At least 4GB RAM
 - 500MB free disk space
 - Internet connection
-- Administrator privileges
 
 ## Prerequisites
 
@@ -25,8 +24,6 @@ The following components must be installed before running the executable:
    - Good example: `C:\Programs\YouTubeDownloader`
    - Bad example: `C:\Program Files\YouTube Downloader`
 3. First time setup:
-   - Right-click the executable
-   - Select "Run as administrator"
    - If Windows SmartScreen appears, click "More info" then "Run anyway"
    - You may need to temporarily disable antivirus software for the first run
 
@@ -34,7 +31,6 @@ The following components must be installed before running the executable:
 
 1. Launch the application:
    - Double-click `YouTubeDownloader.exe`
-   - For the first run, use "Run as administrator"
 
 2. Basic Video Download:
    - Paste a YouTube URL
@@ -61,7 +57,6 @@ The following components must be installed before running the executable:
 ## Common Issues and Solutions
 
 1. **Application Won't Start**
-   - Run as administrator
    - Verify Visual C++ Redistributable is installed
    - Move to a path without spaces
    - Temporarily disable antivirus
@@ -75,7 +70,6 @@ The following components must be installed before running the executable:
 
 3. **GUI Problems**
    - Ensure running from a proper path
-   - Run as administrator
    - Check display scaling settings
    - Reinstall Visual C++ Redistributable
 
@@ -97,8 +91,7 @@ The following components must be installed before running the executable:
 If you encounter issues:
 1. Check the application's download history
 2. Verify system requirements
-3. Try running as administrator
-4. Ensure all prerequisites are installed
+3. Ensure all prerequisites are installed
 
 ## Legal Notice
 

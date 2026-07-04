@@ -559,9 +559,6 @@ class YouTubeDownloader:
 
         text_widget.configure(state=tk.DISABLED)
 
-    def __call__(self):
-        self.settings = self.load_settings()
-
 
 # Create Flask app instance
 flask_app = Flask(__name__)
@@ -710,7 +707,6 @@ def main():
 
         app = YouTubeDownloader(root)
         logger.debug("Created YouTubeDownloader instance")
-        app()
         logger.info("Starting main event loop")
         root.mainloop()
 

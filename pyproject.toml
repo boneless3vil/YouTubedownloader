@@ -1,15 +1,16 @@
 [project]
-name = "repl-nix-workspace"
-version = "0.1.0"
-description = "Add your description here"
+name = "youtube-downloader"
+version = "1.0.0"
+description = "Desktop YouTube downloader (Tkinter GUI + local API for the Chrome extension)"
 requires-python = ">=3.11"
 dependencies = [
+    "yt-dlp>=2025.2.19",
+    "pyperclip>=1.9.0",
     "flask>=3.1.0",
     "flask-cors>=5.0.1",
-    "openai>=1.65.4",
+]
+
+[project.optional-dependencies]
+build = [
     "pyinstaller>=6.12.0",
-    "pyperclip>=1.9.0",
-    "pyvirtualdisplay>=3.0",
-    "trafilatura>=2.0.0",
-    "yt-dlp>=2025.2.19",
 ]

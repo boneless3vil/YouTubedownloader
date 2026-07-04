@@ -1,7 +1,7 @@
 # YouTube Video Downloader Project
 
 This project provides two implementations of a YouTube video downloader:
-1. A desktop application built with Python and PyQt
+1. A desktop application built with Python and Tkinter
 2. A Chrome extension for in-browser downloads
 
 ## Project Structure
