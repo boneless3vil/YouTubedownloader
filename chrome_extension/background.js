@@ -74,46 +74,76 @@ chrome.contextMenus.onClicked.addListener((info) => {
   }
 });
 
-// Handle extension icon click
-chrome.action.onClicked.addListener(async (tab) => {
-  if (tab.url && tab.url.includes('youtube.com/watch')) {
-    chrome.tabs.sendMessage(tab.id, {
-      action: 'startDownload',
-      preferences: await getPreferences()
-    });
+// Badge feedback on the extension icon itself: visible even when the
+// on-page button is missing (tab opened before install, YouTube DOM
+// changes, or the content script failed to run)
+function flashBadge(text, color, title) {
+  chrome.action.setBadgeBackgroundColor({ color });
+  chrome.action.setBadgeText({ text });
+  chrome.action.setTitle({ title: title || 'YouTube Easy Downloader' });
+  setTimeout(() => {
+    chrome.action.setBadgeText({ text: '' });
+    chrome.action.setTitle({ title: 'YouTube Easy Downloader' });
+  }, 4000);
+}
+
+// Best-effort: update the on-page button too; ignore tabs with no listener
+function notifyTab(tabId, action, message) {
+  if (tabId == null) return;
+  chrome.tabs.sendMessage(tabId, { action, message }).catch(() => {});
+}
+
+// Must match API_PORT in youtube_downloader.py and manifest host_permissions
+const API_URL = 'http://localhost:47811/api/download';
+
+async function startDownload(url, tabId) {
+  if (!url || !url.includes('youtube.com/watch')) {
+    flashBadge('!', '#f0ad4e', 'Open a YouTube video page first');
+    return { success: false, error: 'Not a YouTube video page' };
   }
+  try {
+    const preferences = await getPreferences();
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url, settings: preferences })
+    });
+    let data;
+    try {
+      data = await response.json();
+    } catch {
+      // Something answered, but not with our API's JSON
+      throw new Error('Another program is answering on the downloader\'s port');
+    }
+    if (!data.success) {
+      throw new Error(data.error || 'Download failed');
+    }
+    flashBadge('✓', '#2e7d32', 'Download started');
+    notifyTab(tabId, 'downloadStarted', 'Download started successfully');
+    return data;
+  } catch (error) {
+    // "Failed to fetch" = nothing listening on the API port
+    const hint = String(error.message).includes('Failed to fetch')
+      ? 'Desktop app is not running - start YouTube Downloader first'
+      : error.message;
+    flashBadge('✗', '#c62828', 'Download failed: ' + hint);
+    notifyTab(tabId, 'downloadError', hint);
+    return { success: false, error: hint };
+  }
+}
+
+// Exposed for automated E2E tests (drive the icon-click path directly)
+globalThis.__startDownload = startDownload;
+
+// Extension icon click: download directly - no content-script round trip,
+// so it works even when the page button couldn't be injected
+chrome.action.onClicked.addListener((tab) => {
+  startDownload(tab.url, tab.id);
 });
 
-// Handle messages from content script
+// On-page button clicks arrive from the content script
 chrome.runtime.onMessage.addListener((request, sender) => {
   if (request.action === 'downloadVideo') {
-    getPreferences()
-      .then(preferences => fetch('http://localhost:5000/api/download', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          url: request.url,
-          settings: preferences
-        })
-      }))
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          chrome.tabs.sendMessage(sender.tab.id, {
-            action: 'downloadStarted',
-            message: 'Download started successfully'
-          });
-        } else {
-          throw new Error(data.error || 'Download failed');
-        }
-      })
-      .catch(error => {
-        chrome.tabs.sendMessage(sender.tab.id, {
-          action: 'downloadError',
-          message: error.message
-        });
-      });
+    startDownload(request.url, sender.tab && sender.tab.id);
   }
 });

@@ -16,7 +16,7 @@ A convenient Chrome extension that adds one-click video download capabilities to
 
 The extension does not download videos by itself — it sends the video URL to
 the desktop application, which does the downloading. The desktop app has a
-small server **built in** at `http://localhost:5000` (local machine only);
+small server **built in** at `http://localhost:47811` (local machine only);
 starting the app starts the server, so there is nothing separate to install.
 The desktop app must be running for the extension to work, and files are
 saved by the desktop app to your Downloads folder.
@@ -51,7 +51,7 @@ This extension requires the following permissions:
 - Storage (for saving preferences)
 - ActiveTab / Scripting (for reading the current video URL)
 - Context Menus (for the right-click preferences menu)
-- Host permissions for youtube.com and `http://localhost:5000` (the desktop app's API)
+- Host permissions for youtube.com and `http://localhost:47811` (the desktop app's API)
 
 ## Development
 

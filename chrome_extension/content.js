@@ -62,15 +62,10 @@ function addDownloadButton() {
   menu.appendChild(downloadButton);
 }
 
-// Handle messages from background script
+// Status updates from the background script (sent for both the on-page
+// button and extension-icon downloads)
 chrome.runtime.onMessage.addListener(function(message) {
-  if (message.action === 'startDownload') {
-    // Extension icon was clicked, trigger download button click
-    const downloadButton = document.querySelector('.yt-download-btn');
-    if (downloadButton && !downloadButton.disabled) {
-      downloadButton.click();
-    }
-  } else {
+  {
     const button = document.querySelector('.yt-download-btn');
     if (!button) return;
 

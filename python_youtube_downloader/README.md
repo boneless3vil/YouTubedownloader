@@ -94,16 +94,16 @@ Then install ffmpeg (and ideally Deno) with your system's package manager.
 
 The desktop app doubles as the backend for the companion Chrome extension —
 there is no separate server to install or run. When the app starts, it also
-starts a small API on `http://127.0.0.1:5000` (reachable only from this
+starts a small API on `http://127.0.0.1:47811` (reachable only from this
 machine). The extension sends the video URL and your preferences there, and
 the desktop app performs the download.
 
 - `GET /` — health check; the extension's downloads work only while the app is running
 - `POST /api/download` — starts a download (`{"url": ..., "settings": {"downloadType": ..., "quality": ...}}`)
 
-API downloads are saved to your `~/Downloads` folder. See
-[chrome_extension/INSTALL.md](../chrome_extension/INSTALL.md) for installing
-the extension itself.
+API downloads are saved to the destination folder configured in the app's
+Settings. See [chrome_extension/INSTALL.md](../chrome_extension/INSTALL.md)
+for installing the extension itself.
 
 ## Troubleshooting
 

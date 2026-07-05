@@ -884,10 +884,23 @@ def api_download():
         logger.error(f"Download error: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
+# Not 5000: that's Flask's default, and other dev servers squat on it (a
+# collision was observed in the wild). Must match the extension's background.js
+# and manifest.json host_permissions.
+API_PORT = 47811
+
+
 def run_flask():
     # Bind to localhost only: the API is meant for the local Chrome extension,
     # exposing it on all interfaces would let anyone on the network trigger downloads
-    flask_app.run(host='127.0.0.1', port=5000)
+    try:
+        flask_app.run(host='127.0.0.1', port=API_PORT)
+    except OSError:
+        # Port taken: GUI downloads still work, only the extension is affected
+        logger.critical(
+            f"Could not bind 127.0.0.1:{API_PORT} - is another copy of the "
+            "app running? The Chrome extension will not work this session.",
+            exc_info=True)
 
 def main():
     logger.info("Starting YouTube Downloader application")
