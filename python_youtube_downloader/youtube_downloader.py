@@ -89,6 +89,12 @@ def build_download_paths(settings):
     return paths
 
 
+# Let yt-dlp fetch its official JS challenge solver (cached after first use);
+# without it YouTube's "n challenge" fails, hiding formats and throttling
+# download speed
+BASE_YDL_OPTS = {"remote_components": ["ejs:github"]}
+
+
 class FormatSelector(tk.Toplevel):
     def __init__(self, parent, formats, merge_audio=False):
         self.selected_format = None
@@ -500,7 +506,7 @@ class YouTubeDownloader:
 
     def fetch_formats(self, url):
         try:
-            with yt_dlp.YoutubeDL() as ydl:
+            with yt_dlp.YoutubeDL(dict(BASE_YDL_OPTS)) as ydl:
                 info = ydl.extract_info(url, download=False)
 
                 # Check if URL is a playlist
@@ -577,6 +583,7 @@ class YouTubeDownloader:
         outtmpl = '%(playlist_index)s-%(title)s.%(ext)s' if is_playlist else '%(title)s.%(ext)s'
 
         ydl_opts = {
+            **BASE_YDL_OPTS,
             'outtmpl': outtmpl,
             'paths': build_download_paths(self.settings),
             'progress_hooks': [self.download_progress_hook],
@@ -853,6 +860,7 @@ def api_download():
         # app's Settings
         app_settings = load_settings(get_base_path())
         ydl_opts = {
+            **BASE_YDL_OPTS,
             'format': selected_format,
             'outtmpl': '%(title)s.%(ext)s',
             'paths': build_download_paths(app_settings),
