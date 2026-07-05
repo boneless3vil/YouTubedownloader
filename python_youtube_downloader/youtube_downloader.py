@@ -90,8 +90,9 @@ def build_download_paths(settings):
 
 
 class FormatSelector(tk.Toplevel):
-    def __init__(self, parent, formats):
+    def __init__(self, parent, formats, merge_audio=False):
         self.selected_format = None
+        self.merge_audio = merge_audio
         try:
             super().__init__(parent)
             self.title("Select Format")
@@ -142,13 +143,18 @@ class FormatSelector(tk.Toplevel):
                     elif f.get('height'):
                         resolution = f"{f.get('height')}p"
 
+                    acodec = f.get('acodec', 'N/A')
+                    if self.merge_audio and acodec in (None, 'none'):
+                        # Video-only stream; best audio is merged at download
+                        acodec = 'auto (best)'
+
                     self.tree.insert("", tk.END, values=(
                         str(f.get('format_id', 'N/A')),
                         str(f.get('ext', 'N/A')),
                         str(resolution),
                         str(filesize),
                         f"{str(f.get('tbr', 'N/A'))} kbps" if f.get('tbr') else 'N/A',
-                        str(f.get('acodec', 'N/A'))
+                        str(acodec)
                     ))
                 except Exception as e:
                     logger.error(f"Error processing format: {str(e)}")
@@ -205,12 +211,15 @@ class YouTubeDownloader:
             self.main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
             # Create and pack all GUI elements
-            self.create_menubar()
             self.create_url_frame()
             self.create_download_options()
             self.create_playlist_options()
             self.create_progress_frame()
             self.create_button_frame()
+
+            # Settings lives in the window's native title-bar menu (the icon
+            # at the top left); deferred until the window exists on screen
+            self.root.after(200, self.add_settings_to_system_menu)
             logger.debug("GUI setup completed successfully")
         except Exception as e:
             logger.error(f"Error in setup_gui: {str(e)}", exc_info=True)
@@ -225,19 +234,88 @@ class YouTubeDownloader:
         for icon_path in candidates:
             if os.path.exists(icon_path):
                 try:
-                    self.root.iconbitmap(icon_path)
+                    # default= applies to every window (Settings, History, ...)
+                    self.root.iconbitmap(default=icon_path)
                 except tk.TclError:
                     logger.warning(f"Could not apply window icon {icon_path}")
                 return
 
-    def create_menubar(self):
-        menubar = tk.Menu(self.root, tearoff=0)
-        file_menu = tk.Menu(menubar, tearoff=0)
-        file_menu.add_command(label="Settings...", command=self.show_settings)
-        file_menu.add_separator()
-        file_menu.add_command(label="Exit", command=self.root.destroy)
-        menubar.add_cascade(label="File", menu=file_menu)
-        self.root.config(menu=menubar)
+    SYSMENU_SETTINGS_ID = 0x1000  # app-defined WM_SYSCOMMAND ids must be < 0xF000
+
+    def add_settings_to_system_menu(self):
+        """Append Settings... to the native title-bar (system) menu.
+
+        Windows-only: the system menu belongs to the OS window, so this uses
+        the Win32 API and subclasses the window procedure to receive the
+        click. If anything fails, the Settings button still works.
+        """
+        if os.name != 'nt':
+            return
+        # Never install twice: rebinding _wnd_proc_ref would garbage-collect
+        # the callback Windows is still calling, crashing the process
+        if getattr(self, '_wnd_proc_ref', None) is not None:
+            return
+        try:
+            import ctypes
+            from ctypes import wintypes
+
+            user32 = ctypes.windll.user32
+            LRESULT = ctypes.c_longlong
+            GWLP_WNDPROC = -4
+            WM_SYSCOMMAND = 0x0112
+            MF_SEPARATOR, MF_STRING = 0x800, 0x0
+
+            # The OS-level window is the parent of Tk's inner window
+            hwnd = user32.GetParent(self.root.winfo_id())
+            if not hwnd:
+                return
+
+            user32.GetSystemMenu.restype = ctypes.c_void_p
+            user32.GetSystemMenu.argtypes = [wintypes.HWND, wintypes.BOOL]
+            user32.AppendMenuW.argtypes = [ctypes.c_void_p, ctypes.c_uint,
+                                           ctypes.c_size_t, wintypes.LPCWSTR]
+            sysmenu = user32.GetSystemMenu(hwnd, False)
+            user32.AppendMenuW(sysmenu, MF_SEPARATOR, 0, None)
+            user32.AppendMenuW(sysmenu, MF_STRING, self.SYSMENU_SETTINGS_ID, "Settings...")
+
+            user32.CallWindowProcW.restype = LRESULT
+            user32.CallWindowProcW.argtypes = [ctypes.c_void_p, wintypes.HWND,
+                                               ctypes.c_uint, wintypes.WPARAM,
+                                               wintypes.LPARAM]
+            user32.SetWindowLongPtrW.restype = ctypes.c_void_p
+            user32.SetWindowLongPtrW.argtypes = [wintypes.HWND, ctypes.c_int,
+                                                 ctypes.c_void_p]
+
+            WNDPROC = ctypes.WINFUNCTYPE(LRESULT, wintypes.HWND, ctypes.c_uint,
+                                         wintypes.WPARAM, wintypes.LPARAM)
+
+            # The callback must not call into Tcl/Tk: it runs re-entrantly
+            # inside Tk's own message dispatch, which crashes the
+            # interpreter. It only sets a flag; the poller below reacts.
+            self._sysmenu_clicked = False
+
+            def wnd_proc(h, msg, wparam, lparam):
+                if msg == WM_SYSCOMMAND and int(wparam) == self.SYSMENU_SETTINGS_ID:
+                    self._sysmenu_clicked = True
+                    return 0
+                return user32.CallWindowProcW(self._old_wnd_proc, h, msg, wparam, lparam)
+
+            # Keep a reference on self: if the callback is garbage collected
+            # while installed, the process crashes
+            self._wnd_proc_ref = WNDPROC(wnd_proc)
+            self._old_wnd_proc = user32.SetWindowLongPtrW(
+                hwnd, GWLP_WNDPROC,
+                ctypes.cast(self._wnd_proc_ref, ctypes.c_void_p))
+
+            def poll_sysmenu():
+                if self._sysmenu_clicked:
+                    self._sysmenu_clicked = False
+                    self.show_settings()
+                self.root.after(150, poll_sysmenu)
+            poll_sysmenu()
+            logger.debug("Settings added to the system menu")
+        except Exception:
+            logger.warning("Could not add Settings to the system menu", exc_info=True)
 
     def create_url_frame(self):
         # URL Frame with validation
@@ -248,6 +326,9 @@ class YouTubeDownloader:
         self.url_var = tk.StringVar()
         self.url_entry = ttk.Entry(url_frame, textvariable=self.url_var)
         self.url_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+
+        ttk.Button(url_frame, text="Paste", width=7,
+                   command=self.paste_url).pack(side=tk.LEFT, padx=(0, 5))
 
         self.add_context_menu(self.url_entry)
         self.check_clipboard()
@@ -282,6 +363,22 @@ class YouTubeDownloader:
         url = self.url_var.get().strip()
         if url and url != self._last_fetched_url and self.AUTO_FETCH_RE.search(url):
             self.prepare_download()
+
+    def paste_url(self):
+        """Paste the clipboard URL and search for formats immediately."""
+        try:
+            text = (pyperclip.paste() or "").strip()
+        except Exception:
+            text = ""
+        if not text:
+            messagebox.showerror("Error", "Clipboard is empty")
+            return
+        self.url_var.set(text)
+        # Skip the debounce the paste just scheduled - search right now
+        if self._auto_fetch_job is not None:
+            self.root.after_cancel(self._auto_fetch_job)
+            self._auto_fetch_job = None
+        self.prepare_download()
 
     def create_download_options(self):
         download_frame = ttk.LabelFrame(self.main_frame, text="Download Options", padding="10")
@@ -424,9 +521,11 @@ class YouTubeDownloader:
                 # Filter and sort formats based on download type
                 download_type = self.download_type.get()
                 if download_type == "video+audio":
-                    formats = [f for f in formats if 
+                    # List every video format, not just files that already
+                    # contain audio - YouTube only serves those at low
+                    # resolution. Audio is merged in at download time.
+                    formats = [f for f in formats if
                         f.get('vcodec') != 'none' and
-                        f.get('acodec') != 'none' and
                         f.get('ext') in ['mp4', 'mkv', 'webm']
                     ]
                     formats.sort(key=lambda x: (
@@ -460,7 +559,8 @@ class YouTubeDownloader:
             self.root.after(0, self.status_var.set, "Ready")
 
     def show_format_selector(self, formats, url):
-        selector = FormatSelector(self.root, formats)
+        selector = FormatSelector(self.root, formats,
+                                  merge_audio=self.download_type.get() == "video+audio")
         self.root.wait_window(selector)
         if selector.selected_format:
             self.start_download(url, selector.selected_format)
@@ -480,7 +580,10 @@ class YouTubeDownloader:
             'outtmpl': outtmpl,
             'paths': build_download_paths(self.settings),
             'progress_hooks': [self.download_progress_hook],
-            'ignoreerrors': True
+            'ignoreerrors': True,
+            # Fetch DASH/HLS fragments in parallel - large downloads are
+            # substantially faster
+            'concurrent_fragment_downloads': 4
         }
 
         if is_playlist:
@@ -507,8 +610,10 @@ class YouTubeDownloader:
             ydl_opts['playlist_reverse'] = self.reverse_playlist.get()
 
         if download_type == "video+audio":
+            # Merge the chosen video with the best audio; fall back to the
+            # bare format (progressive files already contain audio)
             ydl_opts.update({
-                'format': f'{format_id}+bestaudio[ext=m4a]/best',
+                'format': f'{format_id}+bestaudio[ext=m4a]/{format_id}+bestaudio/{format_id}/best',
                 'merge_output_format': self.settings['format']
             })
         elif download_type == "video-only":
@@ -709,75 +814,63 @@ def api_download():
         logger.info(f"Download request received for URL: {video_url}")
         logger.debug(f"Download settings: {settings}")
 
-        # Initialize download with settings
-        with yt_dlp.YoutubeDL() as ydl:
-            info = ydl.extract_info(video_url, download=False)
-            formats = info['formats']
+        download_type = settings.get('downloadType', 'video-audio')
+        if download_type == 'video+audio':  # popup uses this spelling
+            download_type = 'video-audio'
+        quality = settings.get('quality', 'highest')
 
-            # Filter formats based on settings
-            download_type = settings.get('downloadType', 'video-audio')
-            if download_type == 'video+audio':  # popup uses this spelling
-                download_type = 'video-audio'
-            quality = settings.get('quality', 'highest')
+        # Format selection expressions: yt-dlp resolves these itself, so the
+        # request doesn't pay for a metadata extraction, and video-audio gets
+        # full-resolution video merged with the best audio instead of being
+        # capped at YouTube's low-resolution progressive files
+        format_map = {
+            'video-audio': {
+                'highest': 'bestvideo+bestaudio/best',
+                'medium': 'bestvideo[height<=720]+bestaudio/best[height<=720]/best',
+                'lowest': 'worstvideo+worstaudio/worst',
+            },
+            'video-only': {
+                'highest': 'bestvideo',
+                'medium': 'bestvideo[height<=720]/bestvideo',
+                'lowest': 'worstvideo',
+            },
+            'audio-only': {
+                'highest': 'bestaudio',
+                'medium': 'bestaudio[abr<=128]/bestaudio',
+                'lowest': 'worstaudio',
+            },
+        }
+        type_formats = format_map.get(download_type)
+        if type_formats is None:
+            return jsonify({
+                'success': False,
+                'error': f'Unknown download type: {download_type}'
+            }), 400
+        selected_format = type_formats.get(quality, type_formats['highest'])
+        logger.info(f"Selected format expression: {selected_format}")
 
-            if download_type == "video-audio":
-                formats = [f for f in formats if 
-                    f.get('vcodec') != 'none' and
-                    f.get('acodec') != 'none'
-                ]
-            elif download_type == "video-only":
-                formats = [f for f in formats if 
-                    f.get('vcodec') != 'none' and
-                    f.get('acodec') == 'none'
-                ]
-            else:  # audio-only
-                formats = [f for f in formats if 
-                    f.get('acodec') != 'none' and
-                    f.get('vcodec') == 'none'
-                ]
+        # Honor the folders and merge format configured in the desktop
+        # app's Settings
+        app_settings = load_settings(get_base_path())
+        ydl_opts = {
+            'format': selected_format,
+            'outtmpl': '%(title)s.%(ext)s',
+            'paths': build_download_paths(app_settings),
+            'merge_output_format': app_settings['format'],
+            'concurrent_fragment_downloads': 4,
+        }
 
-            if not formats:
-                return jsonify({
-                    'success': False,
-                    'error': f'No formats found for type: {download_type}'
-                }), 400
+        # Start download in background thread
+        def download_thread():
+            try:
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    ydl.download([video_url])
+                logger.info("Download completed successfully")
+            except Exception as e:
+                logger.error(f"Download failed: {str(e)}")
 
-            # Sort formats by quality (audio formats have no height, use bitrate)
-            if download_type == "audio-only":
-                formats.sort(key=lambda x: float(x.get('abr', 0) or 0), reverse=True)
-            else:
-                formats.sort(key=lambda x: int(x.get('height', 0) or 0), reverse=True)
-
-            # Select format based on quality preference
-            if quality == 'highest':
-                selected_format = formats[0]['format_id']
-            elif quality == 'lowest':
-                selected_format = formats[-1]['format_id']
-            else:  # medium
-                selected_format = formats[len(formats)//2]['format_id']
-
-            logger.info(f"Selected format: {selected_format}")
-
-            # Configure download options - honor the folders configured in
-            # the desktop app's Settings
-            app_settings = load_settings(get_base_path())
-            ydl_opts = {
-                'format': selected_format,
-                'outtmpl': '%(title)s.%(ext)s',
-                'paths': build_download_paths(app_settings),
-            }
-
-            # Start download in background thread
-            def download_thread():
-                try:
-                    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                        ydl.download([video_url])
-                    logger.info("Download completed successfully")
-                except Exception as e:
-                    logger.error(f"Download failed: {str(e)}")
-
-            threading.Thread(target=download_thread, daemon=True).start()
-            return jsonify({'success': True, 'message': 'Download started'})
+        threading.Thread(target=download_thread, daemon=True).start()
+        return jsonify({'success': True, 'message': 'Download started'})
 
     except Exception as e:
         logger.error(f"Download error: {str(e)}")
@@ -790,6 +883,16 @@ def run_flask():
 
 def main():
     logger.info("Starting YouTube Downloader application")
+    if os.name == 'nt':
+        # Give the process its own taskbar identity; otherwise Windows groups
+        # the window under pythonw.exe and shows the Python/Tk icon instead
+        # of ours
+        try:
+            import ctypes
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
+                "Boneless3vil.YouTubeDownloader")
+        except Exception:
+            logger.warning("Could not set AppUserModelID", exc_info=True)
     try:
         # Start Flask server in a separate thread
         flask_thread = threading.Thread(target=run_flask, daemon=True)

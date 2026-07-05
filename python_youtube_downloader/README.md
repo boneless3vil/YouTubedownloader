@@ -80,11 +80,11 @@ Then install ffmpeg (and ideally Deno) with your system's package manager.
    - Click "Download" and select quality
    - Monitor progress for each video
 
-4. Settings:
-   - Click "Settings" to configure:
-     - Download path
-     - Default video format
-   - Settings are saved automatically
+4. Settings (via the "Settings" button, or the window's title-bar icon menu at the top left):
+   - Source folder for in-progress downloads (optional; finished files are moved to the destination)
+   - Destination folder for finished downloads
+   - Default download type (Video + Audio, Video Only, Audio Only)
+   - Default video format
 
 5. History:
    - Click "History" to view past downloads
