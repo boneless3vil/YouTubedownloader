@@ -587,13 +587,20 @@ class YouTubeDownloader:
             'outtmpl': outtmpl,
             'paths': build_download_paths(self.settings),
             'progress_hooks': [self.download_progress_hook],
-            'ignoreerrors': True,
             # Fetch DASH/HLS fragments in parallel - large downloads are
             # substantially faster
             'concurrent_fragment_downloads': 4
         }
 
+        if not is_playlist:
+            # A watch URL carrying a &list= param must not pull the playlist
+            ydl_opts['noplaylist'] = True
+
         if is_playlist:
+            # Skip broken entries and keep downloading the rest. Only for
+            # playlists: on a single video this would swallow the real error
+            # and leave nothing but a generic non-zero exit code
+            ydl_opts['ignoreerrors'] = True
             # Add playlist-specific options
             if not self.download_all.get():
                 try:
@@ -642,14 +649,18 @@ class YouTubeDownloader:
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                     error_code = ydl.download([url])
                     if error_code != 0:
-                        raise Exception("Download failed with non-zero exit code")
+                        # Only reachable with ignoreerrors (playlists): some
+                        # entries failed but the rest were downloaded
+                        raise Exception("Some playlist entries could not be downloaded "
+                                        "(see download history for details)")
 
                 self.root.after(0, self.status_var.set, "Download completed!")
                 self.root.after(0, self.progress_var.set, 100)
                 self.log_download(url, f"{download_type}:{format_id}", "Success" + playlist_suffix)
                 self.root.after(0, lambda: messagebox.showinfo("Success", "Download completed!"))
             except Exception as e:
-                error_msg = str(e)
+                # yt-dlp errors read "ERROR: <reason>"; show just the reason
+                error_msg = re.sub(r'^\s*ERROR:\s*', '', str(e))
                 self.root.after(0, self.status_var.set, "Download failed!")
                 self.log_download(url, f"{download_type}:{format_id}", f"Failed: {error_msg}")
                 self.root.after(0, lambda: messagebox.showerror("Error", f"Download failed: {error_msg}"))
