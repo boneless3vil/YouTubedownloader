@@ -54,7 +54,7 @@
 
 - The desktop application must be installed and running. The extension's
   server is **built into the desktop app** — starting `youtube_downloader.py`
-  (or `YouTube Downloader.bat`) also starts the API the extension talks to
+  (or `YouTubeDownloader.bat`) also starts the API the extension talks to
   at `http://localhost:47811`. There is nothing separate to install or run.
 - To install the desktop app, run `python install.py` in the
   `python_youtube_downloader` folder — the installer can also open this

@@ -145,7 +145,7 @@ def step_launcher():
         print(f"  {VENV_PYTHON} {os.path.join(SCRIPT_DIR, 'youtube_downloader.py')}")
         return
 
-    launcher = os.path.join(SCRIPT_DIR, "YouTube Downloader.bat")
+    launcher = os.path.join(SCRIPT_DIR, "YouTubeDownloader.bat")
     with open(launcher, "w") as f:
         f.write('@echo off\r\n'
                 'start "" "%~dp0.venv\\Scripts\\pythonw.exe" '
@@ -172,7 +172,7 @@ def step_launcher():
 def step_chrome_extension():
     print("\n--- Chrome extension (optional) ---")
     print("The extension adds one-click downloads on youtube.com. It talks to")
-    print("a small server that is BUILT INTO the desktop app (port 5000 on")
+    print("a small server that is BUILT INTO the desktop app (port 47811 on")
     print("this machine only), so there is nothing extra to install or run -")
     print("just keep the desktop app open while you use the extension.")
     if not os.path.isdir(EXTENSION_DIR):
@@ -208,7 +208,7 @@ def main():
 
     print("\n=== Setup complete ===")
     if IS_WINDOWS:
-        print('Run the app with "YouTube Downloader.bat" (or the desktop shortcut).')
+        print('Run the app with "YouTubeDownloader.bat" (or the desktop shortcut).')
     print("The Chrome extension works whenever the desktop app is running.")
 
 

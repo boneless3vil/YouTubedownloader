@@ -39,7 +39,7 @@ It walks you through everything needed at runtime:
 2. Creates a virtual environment (`.venv`) and installs the Python packages into it
 3. Checks for ffmpeg and Deno, and offers to install them (via winget on Windows)
 4. Asks where downloads should be saved (writes `settings.json`)
-5. Creates `YouTube Downloader.bat` and an optional desktop shortcut (Windows)
+5. Creates `YouTubeDownloader.bat` and an optional desktop shortcut (Windows)
 6. Optionally helps you install the Chrome extension
 
 Every prompt has a sensible default — pressing Enter through the installer gives a working setup.
@@ -60,7 +60,7 @@ Then install ffmpeg (and ideally Deno) with your system's package manager.
 
 ## Usage
 
-1. Start the application — double-click `YouTube Downloader.bat` (Windows), or run:
+1. Start the application — double-click `YouTubeDownloader.bat` (Windows), or run:
 ```bash
 .venv\Scripts\python youtube_downloader.py
 ```
