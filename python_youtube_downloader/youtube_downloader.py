@@ -476,7 +476,7 @@ class YouTubeDownloader:
             self.root.after(50, self._align_action_buttons)
             return
         usable = box_height - offset
-        gap = 6
+        gap = 3
         top_h = (usable - gap) // 2
         bottom_h = usable - gap - top_h   # bottom edge lands exactly on the box
         width = self._btn_spacer.winfo_reqwidth()
