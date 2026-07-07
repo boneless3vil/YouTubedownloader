@@ -1,4 +1,5 @@
 import tkinter as tk
+import tkinter.font as tkfont
 from tkinter import ttk, messagebox, filedialog
 import yt_dlp
 import os
@@ -450,9 +451,13 @@ class YouTubeDownloader:
 
         # Paste stacked on Download, together exactly as tall as the box:
         # fill=Y pins the column to the LabelFrame's height and the uniform
-        # rows split it evenly between the two buttons
+        # rows split it evenly between the two buttons. The LabelFrame's
+        # visible outline is drawn at the vertical middle of its label text,
+        # half a line below the widget's top edge - pad the column down by
+        # that much so the buttons line up with the drawn corners
+        border_offset = tkfont.nametofont("TkDefaultFont").metrics("linespace") // 2
         btn_col = ttk.Frame(options_row)
-        btn_col.pack(side=tk.LEFT, fill=tk.Y, padx=(10, 0))
+        btn_col.pack(side=tk.LEFT, fill=tk.Y, padx=(10, 0), pady=(border_offset, 0))
         btn_col.rowconfigure(0, weight=1, uniform="btns")
         btn_col.rowconfigure(1, weight=1, uniform="btns")
         btn_col.columnconfigure(0, weight=1)
