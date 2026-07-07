@@ -80,15 +80,14 @@ Then install ffmpeg (and ideally Deno) with your system's package manager.
    - Click "Download" and select quality
    - Monitor progress for each video
 
-4. Settings (via the "Settings" button, or the window's title-bar icon menu at the top left):
+4. Settings (click the icon in the window's title bar, top left, then "Settings..."):
    - Source folder for in-progress downloads (optional; finished files are moved to the destination)
    - Destination folder for finished downloads
    - Default download type (Video + Audio, Video Only, Audio Only)
    - Default video format
 
-5. History:
-   - Click "History" to view past downloads
-   - Includes timestamp, format, and status
+5. History (title-bar icon menu, "Download History..."):
+   - View past downloads with timestamp, format, and status
 
 ## Built-in server for the Chrome extension
 

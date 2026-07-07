@@ -102,13 +102,19 @@ class FormatSelector(tk.Toplevel):
         try:
             super().__init__(parent)
             self.title("Select Format")
-            self.geometry("600x300")  
-            self.resizable(False, False)  
 
             if not formats:
+                self.geometry("600x120")
+                self.resizable(False, False)
                 ttk.Label(self, text="No suitable formats found for this download type.").pack(pady=20)
                 ttk.Button(self, text="Close", command=self.destroy).pack(pady=10)
                 return
+
+            # Bottom bar packed first so it keeps its space when resizing
+            btn_frame = ttk.Frame(self)
+            btn_frame.pack(side=tk.BOTTOM, fill=tk.X, pady=(0, 8))
+            ttk.Button(btn_frame, text="Download",
+                       command=self.select_format).pack()
 
             main_frame = ttk.Frame(self)
             main_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
@@ -168,6 +174,20 @@ class FormatSelector(tk.Toplevel):
 
             self.tree.bind('<Double-1>', lambda e: self.select_format())
 
+            # Resizable, but no taller than the end of the list
+            rowheight = 20
+            try:
+                rh = ttk.Style(self).lookup("Treeview", "rowheight")
+                rowheight = int(rh) if rh else 20
+            except (ValueError, tk.TclError):
+                pass
+            chrome = 95  # heading row + button bar + padding
+            full_height = len(formats) * rowheight + chrome
+            self.resizable(True, True)
+            self.minsize(460, min(200, full_height))
+            self.maxsize(1200, max(200, full_height))
+            self.geometry(f"600x{min(300, full_height)}")
+
             self.grab_set()
         except Exception as e:
             logger.error(f"Error in FormatSelector initialization: {str(e)}", exc_info=True)
@@ -176,10 +196,12 @@ class FormatSelector(tk.Toplevel):
 
     def select_format(self):
         selection = self.tree.selection()
-        if selection:
-            values = self.tree.item(selection[0])['values']
-            self.selected_format = str(values[0])
-            self.destroy()
+        if not selection:
+            self.bell()  # Download pressed with nothing selected
+            return
+        values = self.tree.item(selection[0])['values']
+        self.selected_format = str(values[0])
+        self.destroy()
 
 class YouTubeDownloader:
     def __init__(self, root):
@@ -187,12 +209,16 @@ class YouTubeDownloader:
             logger.debug("Initializing YouTube Downloader GUI")
             self.root = root
             self.root.title("YouTube Downloader")
-            self.root.geometry("500x300")
-            self.root.resizable(True, True)
 
             # Initialize variables
             self.format_cache = {}
             self.setup_gui()
+
+            # Size the window to exactly fit its content (no clipped fields,
+            # no dead space) and keep it fixed
+            self.root.update_idletasks()
+            self.root.geometry("")
+            self.root.resizable(False, False)
             logger.debug("GUI initialization completed")
         except Exception as e:
             logger.error(f"Failed to initialize GUI: {str(e)}", exc_info=True)
@@ -246,16 +272,21 @@ class YouTubeDownloader:
                     logger.warning(f"Could not apply window icon {icon_path}")
                 return
 
-    SYSMENU_SETTINGS_ID = 0x1000  # app-defined WM_SYSCOMMAND ids must be < 0xF000
+    # App-defined WM_SYSCOMMAND ids must be < 0xF000
+    SYSMENU_SETTINGS_ID = 0x1000
+    SYSMENU_HISTORY_ID = 0x1010
 
     def add_settings_to_system_menu(self):
-        """Append Settings... to the native title-bar (system) menu.
+        """Append Settings... and Download History... to the native
+        title-bar (system) menu.
 
         Windows-only: the system menu belongs to the OS window, so this uses
         the Win32 API and subclasses the window procedure to receive the
-        click. If anything fails, the Settings button still works.
+        clicks. On other platforms (or if the hook fails) a plain menubar is
+        used instead so the dialogs stay reachable.
         """
         if os.name != 'nt':
+            self._fallback_menubar()
             return
         # Never install twice: rebinding _wnd_proc_ref would garbage-collect
         # the callback Windows is still calling, crashing the process
@@ -280,9 +311,14 @@ class YouTubeDownloader:
             user32.GetSystemMenu.argtypes = [wintypes.HWND, wintypes.BOOL]
             user32.AppendMenuW.argtypes = [ctypes.c_void_p, ctypes.c_uint,
                                            ctypes.c_size_t, wintypes.LPCWSTR]
+            self._sysmenu_actions = {
+                self.SYSMENU_SETTINGS_ID: ("Settings...", self.show_settings),
+                self.SYSMENU_HISTORY_ID: ("Download History...", self.show_history),
+            }
             sysmenu = user32.GetSystemMenu(hwnd, False)
             user32.AppendMenuW(sysmenu, MF_SEPARATOR, 0, None)
-            user32.AppendMenuW(sysmenu, MF_STRING, self.SYSMENU_SETTINGS_ID, "Settings...")
+            for item_id, (label, _) in self._sysmenu_actions.items():
+                user32.AppendMenuW(sysmenu, MF_STRING, item_id, label)
 
             user32.CallWindowProcW.restype = LRESULT
             user32.CallWindowProcW.argtypes = [ctypes.c_void_p, wintypes.HWND,
@@ -297,12 +333,12 @@ class YouTubeDownloader:
 
             # The callback must not call into Tcl/Tk: it runs re-entrantly
             # inside Tk's own message dispatch, which crashes the
-            # interpreter. It only sets a flag; the poller below reacts.
-            self._sysmenu_clicked = False
+            # interpreter. It only queues the id; the poller below reacts.
+            self._sysmenu_clicked_ids = []
 
             def wnd_proc(h, msg, wparam, lparam):
-                if msg == WM_SYSCOMMAND and int(wparam) == self.SYSMENU_SETTINGS_ID:
-                    self._sysmenu_clicked = True
+                if msg == WM_SYSCOMMAND and int(wparam) in self._sysmenu_actions:
+                    self._sysmenu_clicked_ids.append(int(wparam))
                     return 0
                 return user32.CallWindowProcW(self._old_wnd_proc, h, msg, wparam, lparam)
 
@@ -314,14 +350,24 @@ class YouTubeDownloader:
                 ctypes.cast(self._wnd_proc_ref, ctypes.c_void_p))
 
             def poll_sysmenu():
-                if self._sysmenu_clicked:
-                    self._sysmenu_clicked = False
-                    self.show_settings()
+                while self._sysmenu_clicked_ids:
+                    item_id = self._sysmenu_clicked_ids.pop(0)
+                    self._sysmenu_actions[item_id][1]()
                 self.root.after(150, poll_sysmenu)
             poll_sysmenu()
-            logger.debug("Settings added to the system menu")
+            logger.debug("Settings and History added to the system menu")
         except Exception:
-            logger.warning("Could not add Settings to the system menu", exc_info=True)
+            logger.warning("Could not modify the system menu; falling back "
+                           "to a menubar", exc_info=True)
+            self._fallback_menubar()
+
+    def _fallback_menubar(self):
+        menubar = tk.Menu(self.root, tearoff=0)
+        app_menu = tk.Menu(menubar, tearoff=0)
+        app_menu.add_command(label="Settings...", command=self.show_settings)
+        app_menu.add_command(label="Download History...", command=self.show_history)
+        menubar.add_cascade(label="Menu", menu=app_menu)
+        self.root.config(menu=menubar)
 
     def create_url_frame(self):
         # URL Frame with validation
@@ -388,7 +434,7 @@ class YouTubeDownloader:
 
     def create_download_options(self):
         download_frame = ttk.LabelFrame(self.main_frame, text="Download Options", padding="10")
-        download_frame.pack(fill=tk.X, pady=10)
+        download_frame.pack(fill=tk.X, pady=(0, 10))
 
         saved_type = self.settings.get("default_download_type", "video+audio")
         if saved_type not in ("video+audio", "video-only", "audio-only"):
@@ -403,8 +449,8 @@ class YouTubeDownloader:
 
     def create_playlist_options(self):
         # Add playlist options frame
-        playlist_frame = ttk.LabelFrame(self.main_frame, text="Playlist Options", padding="5")
-        playlist_frame.pack(fill=tk.X, pady=5)
+        playlist_frame = ttk.LabelFrame(self.main_frame, text="Playlist Options", padding="10")
+        playlist_frame.pack(fill=tk.X, pady=(0, 10))
 
         self.is_playlist = tk.BooleanVar(value=False)
         self.playlist_info = None
@@ -444,22 +490,14 @@ class YouTubeDownloader:
         status_label.pack(anchor=tk.W, pady=(2, 0))  
 
     def create_button_frame(self):
+        # Settings and History live in the title-bar (system) menu; the main
+        # window keeps a single primary action
         button_frame = ttk.Frame(self.main_frame)
-        button_frame.pack(fill=tk.X, pady=(5, 0))
+        button_frame.pack(fill=tk.X, pady=(8, 0))
 
-        # Create buttons with explicit width and text configuration
-        # Using regular tk.Button instead of ttk.Button for better text visibility
-        download_btn = tk.Button(button_frame, text="Download", width=10, 
+        download_btn = tk.Button(button_frame, text="Download", width=16,
                                command=self.prepare_download, relief=tk.RAISED)
-        download_btn.pack(side=tk.LEFT, padx=5)
-
-        settings_btn = tk.Button(button_frame, text="Settings", width=10,
-                               command=self.show_settings, relief=tk.RAISED)
-        settings_btn.pack(side=tk.LEFT, padx=5)
-
-        history_btn = tk.Button(button_frame, text="History", width=10,
-                              command=self.show_history, relief=tk.RAISED)
-        history_btn.pack(side=tk.LEFT, padx=5)
+        download_btn.pack()
 
     def add_context_menu(self, entry):
         menu = tk.Menu(entry, tearoff=0)
