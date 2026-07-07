@@ -238,9 +238,10 @@ class YouTubeDownloader:
             self.style.configure("TButton", padding=5, width=10)
             self.style.configure("TLabel", padding=3)
 
-            # Main frame setup
+            # Main frame setup - the frame's own padding is the window
+            # margin; no extra outer padding on top of it
             self.main_frame = ttk.Frame(self.root, padding="10")
-            self.main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+            self.main_frame.pack(fill=tk.BOTH, expand=True)
 
             # Create and pack all GUI elements
             self.create_url_frame()
@@ -376,10 +377,7 @@ class YouTubeDownloader:
         ttk.Label(url_frame, text="YouTube URL:").pack(side=tk.LEFT)
         self.url_var = tk.StringVar()
         self.url_entry = ttk.Entry(url_frame, textvariable=self.url_var)
-        self.url_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
-
-        ttk.Button(url_frame, text="Paste", width=7,
-                   command=self.paste_url).pack(side=tk.LEFT, padx=(0, 5))
+        self.url_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(5, 0))
 
         self.add_context_menu(self.url_entry)
         self.check_clipboard()
@@ -450,9 +448,22 @@ class YouTubeDownloader:
         ttk.Radiobutton(download_frame, text="Audio Only", value="audio-only",
                        variable=self.download_type).pack(side=tk.LEFT, padx=10)
 
-        self.download_btn = tk.Button(options_row, text="Download", width=12,
+        # Paste stacked on Download, together exactly as tall as the box:
+        # fill=Y pins the column to the LabelFrame's height and the uniform
+        # rows split it evenly between the two buttons
+        btn_col = ttk.Frame(options_row)
+        btn_col.pack(side=tk.LEFT, fill=tk.Y, padx=(10, 0))
+        btn_col.rowconfigure(0, weight=1, uniform="btns")
+        btn_col.rowconfigure(1, weight=1, uniform="btns")
+        btn_col.columnconfigure(0, weight=1)
+
+        paste_btn = tk.Button(btn_col, text="Paste", width=12,
+                              command=self.paste_url, relief=tk.RAISED)
+        paste_btn.grid(row=0, column=0, sticky="nsew", pady=(0, 3))
+
+        self.download_btn = tk.Button(btn_col, text="Download", width=12,
                                       command=self.prepare_download, relief=tk.RAISED)
-        self.download_btn.pack(side=tk.LEFT, padx=(10, 0))
+        self.download_btn.grid(row=1, column=0, sticky="nsew", pady=(3, 0))
 
     def create_playlist_options(self):
         # Add playlist options frame
