@@ -247,7 +247,6 @@ class YouTubeDownloader:
             self.create_download_options()
             self.create_playlist_options()
             self.create_progress_frame()
-            self.create_button_frame()
 
             # Settings lives in the window's native title-bar menu (the icon
             # at the top left); deferred until the window exists on screen
@@ -433,19 +432,27 @@ class YouTubeDownloader:
         self.prepare_download()
 
     def create_download_options(self):
-        download_frame = ttk.LabelFrame(self.main_frame, text="Download Options", padding="10")
-        download_frame.pack(fill=tk.X, pady=(0, 10))
+        # The Download button sits to the right of the option box, outside it
+        options_row = ttk.Frame(self.main_frame)
+        options_row.pack(fill=tk.X, pady=(0, 10))
+
+        download_frame = ttk.LabelFrame(options_row, text="Download Options", padding="10")
+        download_frame.pack(side=tk.LEFT, fill=tk.X, expand=True)
 
         saved_type = self.settings.get("default_download_type", "video+audio")
         if saved_type not in ("video+audio", "video-only", "audio-only"):
             saved_type = "video+audio"
         self.download_type = tk.StringVar(value=saved_type)
-        ttk.Radiobutton(download_frame, text="Video + Audio", value="video+audio", 
+        ttk.Radiobutton(download_frame, text="Video + Audio", value="video+audio",
                        variable=self.download_type).pack(side=tk.LEFT, padx=10)
-        ttk.Radiobutton(download_frame, text="Video Only", value="video-only", 
+        ttk.Radiobutton(download_frame, text="Video Only", value="video-only",
                        variable=self.download_type).pack(side=tk.LEFT, padx=10)
-        ttk.Radiobutton(download_frame, text="Audio Only", value="audio-only", 
+        ttk.Radiobutton(download_frame, text="Audio Only", value="audio-only",
                        variable=self.download_type).pack(side=tk.LEFT, padx=10)
+
+        self.download_btn = tk.Button(options_row, text="Download", width=12,
+                                      command=self.prepare_download, relief=tk.RAISED)
+        self.download_btn.pack(side=tk.LEFT, padx=(10, 0))
 
     def create_playlist_options(self):
         # Add playlist options frame
@@ -488,16 +495,6 @@ class YouTubeDownloader:
         self.status_var = tk.StringVar(value="Ready")
         status_label = ttk.Label(progress_frame, textvariable=self.status_var)
         status_label.pack(anchor=tk.W, pady=(2, 0))  
-
-    def create_button_frame(self):
-        # Settings and History live in the title-bar (system) menu; the main
-        # window keeps a single primary action
-        button_frame = ttk.Frame(self.main_frame)
-        button_frame.pack(fill=tk.X, pady=(8, 0))
-
-        download_btn = tk.Button(button_frame, text="Download", width=16,
-                               command=self.prepare_download, relief=tk.RAISED)
-        download_btn.pack()
 
     def add_context_menu(self, entry):
         menu = tk.Menu(entry, tearoff=0)
