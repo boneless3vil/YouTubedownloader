@@ -449,26 +449,39 @@ class YouTubeDownloader:
         ttk.Radiobutton(download_frame, text="Audio Only", value="audio-only",
                        variable=self.download_type).pack(side=tk.LEFT, padx=10)
 
-        # Paste stacked on Download, together exactly as tall as the box:
-        # fill=Y pins the column to the LabelFrame's height and the uniform
-        # rows split it evenly between the two buttons. The LabelFrame's
-        # visible outline is drawn at the vertical middle of its label text,
-        # half a line below the widget's top edge - pad the column down by
-        # that much so the buttons line up with the drawn corners
-        border_offset = tkfont.nametofont("TkDefaultFont").metrics("linespace") // 2
-        btn_col = ttk.Frame(options_row)
-        btn_col.pack(side=tk.LEFT, fill=tk.Y, padx=(10, 0), pady=(border_offset, 0))
-        btn_col.rowconfigure(0, weight=1, uniform="btns")
-        btn_col.rowconfigure(1, weight=1, uniform="btns")
-        btn_col.columnconfigure(0, weight=1)
+        # Paste stacked on Download beside the box. The buttons are placed
+        # with exact pixel geometry (see _align_action_buttons) so their
+        # outer edges meet the box's drawn outline, which starts half a
+        # label-line below the widget's top edge
+        self.download_frame = download_frame
+        self._btn_spacer = ttk.Frame(options_row, width=100)
+        self._btn_spacer.pack(side=tk.LEFT, fill=tk.Y, padx=(10, 0))
 
-        paste_btn = tk.Button(btn_col, text="Paste", width=12,
-                              command=self.paste_url, relief=tk.RAISED)
-        paste_btn.grid(row=0, column=0, sticky="nsew", pady=(0, 3))
-
-        self.download_btn = tk.Button(btn_col, text="Download", width=12,
+        self.paste_btn = tk.Button(self._btn_spacer, text="Paste", width=12,
+                                   command=self.paste_url, relief=tk.RAISED)
+        self.download_btn = tk.Button(self._btn_spacer, text="Download", width=12,
                                       command=self.prepare_download, relief=tk.RAISED)
-        self.download_btn.grid(row=1, column=0, sticky="nsew", pady=(3, 0))
+        self._btn_spacer.configure(
+            width=max(self.paste_btn.winfo_reqwidth(),
+                      self.download_btn.winfo_reqwidth()))
+        # Align once the box is actually on screen with real geometry;
+        # idle-time callbacks can fire before Tk has computed any sizes
+        self.download_frame.bind('<Map>', lambda e: self._align_action_buttons())
+
+    def _align_action_buttons(self):
+        """Pin Paste/Download to the drawn outline of the options box."""
+        offset = tkfont.nametofont("TkDefaultFont").metrics("linespace") // 2
+        box_height = self.download_frame.winfo_height()
+        if box_height < 20:  # geometry not computed yet - try again shortly
+            self.root.after(50, self._align_action_buttons)
+            return
+        usable = box_height - offset
+        gap = 6
+        top_h = (usable - gap) // 2
+        bottom_h = usable - gap - top_h   # bottom edge lands exactly on the box
+        width = self._btn_spacer.winfo_reqwidth()
+        self.paste_btn.place(x=0, y=offset, width=width, height=top_h)
+        self.download_btn.place(x=0, y=offset + top_h + gap, width=width, height=bottom_h)
 
     def create_playlist_options(self):
         # Add playlist options frame
