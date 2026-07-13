@@ -24,8 +24,8 @@ saved by the desktop app to your Downloads folder.
 ## Installation
 
 1. Install the desktop application first: run `python install.py` in the
-   `python_youtube_downloader` folder (the installer offers to open this
-   extension setup for you). See [INSTALL.md](INSTALL.md) for full steps.
+   repository root (the installer offers to open this extension setup for
+   you). See [INSTALL.md](INSTALL.md) for full steps.
 2. Open Chrome and navigate to `chrome://extensions/`
 3. Enable "Developer mode" using the toggle in the top right
 4. Click "Load unpacked" and select this directory

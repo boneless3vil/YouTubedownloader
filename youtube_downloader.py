@@ -49,6 +49,13 @@ def get_base_path():
         logger.error(f"Error in get_base_path: {str(e)}", exc_info=True)
         raise
 
+# yt-dlp discovers plugin packages named yt_dlp_plugins/ on sys.path. Ours
+# ships the Threads extractor (Threads isn't supported by mainline yt-dlp).
+# In the packaged exe the plugin is bundled into sys._MEIPASS (already on
+# sys.path); adding the exe's own folder too lets a user drop in an updated
+# plugin without rebuilding.
+sys.path.insert(0, get_base_path())
+
 DEFAULT_SETTINGS = {
     # Final destination for finished downloads
     "download_path": os.path.join(os.path.expanduser("~"), "Downloads"),
@@ -57,6 +64,41 @@ DEFAULT_SETTINGS = {
     "temp_path": "",
     "default_download_type": "video+audio",
     "format": "mp4",
+    # Browser to borrow cookies from for Instagram/Threads downloads
+    # ("" = none). Much of Meta's content is behind a login; yt-dlp can
+    # reuse an existing browser session instead of asking for credentials.
+    "cookies_browser": "",
+    # Auto download: skip the format picker and download immediately at the
+    # configured quality when a URL is entered/pasted
+    "auto_download": False,
+    "auto_download_quality": "best",
+}
+
+# Quality presets for auto download and the extension API: a yt-dlp format
+# expression plus an optional format_sort. yt-dlp resolves these itself, so
+# no metadata extraction is paid up front. Quality caps use format_sort
+# ('res' = the SHORTER video dimension) instead of [height<=N] filters:
+# vertical reels/Shorts aren't over-throttled by their large height, and a
+# preference (unlike a filter) still succeeds on sites that only serve one
+# resolution.
+QUALITY_FORMATS = {
+    "video+audio": {
+        "best": ("bestvideo+bestaudio/best", None),
+        "medium": ("bestvideo+bestaudio/best", ["res:720"]),
+        "low": ("bestvideo+bestaudio/best", ["res:480"]),
+    },
+    "video-only": {
+        "best": ("bestvideo", None),
+        "medium": ("bestvideo", ["res:720"]),
+        "low": ("bestvideo", ["res:480"]),
+    },
+    # Audio uses proximity sort (~): 'abr:128' (a cap) proved unreliable in
+    # testing - it picked 48kbps on YouTube; '~' picks the closest bitrate
+    "audio-only": {
+        "best": ("bestaudio/best", None),
+        "medium": ("bestaudio/best", ["abr~128"]),
+        "low": ("bestaudio/best", ["abr~64"]),
+    },
 }
 
 
@@ -77,6 +119,9 @@ def load_settings(base_path):
             settings["download_path"] = DEFAULT_SETTINGS["download_path"]
         if settings.get("temp_path") and not os.path.isdir(settings["temp_path"]):
             settings["temp_path"] = ""
+        settings["auto_download"] = bool(settings.get("auto_download"))
+        if settings.get("auto_download_quality") not in ("best", "medium", "low"):
+            settings["auto_download_quality"] = DEFAULT_SETTINGS["auto_download_quality"]
     except Exception:
         return dict(DEFAULT_SETTINGS)
     return settings
@@ -94,6 +139,49 @@ def build_download_paths(settings):
 # without it YouTube's "n challenge" fails, hiding formats and throttling
 # download speed
 BASE_YDL_OPTS = {"remote_components": ["ejs:github"]}
+
+# Sites the app accepts. yt-dlp can handle many more, but the GUI's format
+# filtering and options are only tuned for these.
+SUPPORTED_URL_RE = re.compile(
+    r'(youtube\.com|youtu\.be|instagram\.com|threads\.(?:net|com))',
+    re.IGNORECASE)
+
+META_URL_RE = re.compile(r'(instagram\.com|threads\.(?:net|com))', re.IGNORECASE)
+
+
+def site_ydl_opts(url, settings):
+    """Per-site yt-dlp options on top of BASE_YDL_OPTS.
+
+    Instagram and Threads gate much of their content behind a login; when a
+    browser is configured in Settings, reuse its session cookies.
+    """
+    opts = dict(BASE_YDL_OPTS)
+    browser = (settings.get("cookies_browser") or "").strip()
+    if browser and META_URL_RE.search(url):
+        opts["cookiesfrombrowser"] = (browser,)
+    return opts
+
+
+def run_with_cookie_fallback(ydl_opts, action):
+    """Run action(ydl); if loading browser cookies fails, retry without them.
+
+    Reading a browser's cookie DB fails routinely (the browser is running
+    and locks the file, or uses cookie encryption yt-dlp can't decrypt).
+    Public posts don't need the login anyway, so a broken cookie source
+    must not take down every Instagram/Threads download.
+    """
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            return action(ydl)
+    except Exception as e:
+        if ('cookiesfrombrowser' not in ydl_opts
+                or 'cookie' not in str(e).lower()):
+            raise
+        logger.warning("Browser cookies unavailable (%s); retrying without "
+                       "cookies", e)
+        opts = {k: v for k, v in ydl_opts.items() if k != 'cookiesfrombrowser'}
+        with yt_dlp.YoutubeDL(opts) as ydl:
+            return action(ydl)
 
 
 class FormatSelector(tk.Toplevel):
@@ -375,7 +463,7 @@ class YouTubeDownloader:
         url_frame = ttk.Frame(self.main_frame)
         url_frame.pack(fill=tk.X, pady=(0, 10))
 
-        ttk.Label(url_frame, text="YouTube URL:").pack(side=tk.LEFT)
+        ttk.Label(url_frame, text="Video URL:").pack(side=tk.LEFT)
         self.url_var = tk.StringVar()
         self.url_entry = ttk.Entry(url_frame, textvariable=self.url_var)
         self.url_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(5, 0))
@@ -386,7 +474,7 @@ class YouTubeDownloader:
         # Enter in the URL field starts the format search
         self.url_entry.bind('<Return>', lambda e: self.prepare_download())
 
-        # Auto-fetch formats when a complete YouTube URL lands in the field
+        # Auto-fetch formats when a complete video URL lands in the field
         # (paste or typing). The trace is installed after check_clipboard so
         # a URL auto-filled from the clipboard at startup doesn't pop a
         # dialog before the user has done anything.
@@ -394,13 +482,19 @@ class YouTubeDownloader:
         self._last_fetched_url = self.url_var.get().strip()
         self.url_var.trace_add('write', self._schedule_auto_fetch)
 
-    # Matches only complete video/shorts/playlist URLs so auto-fetch doesn't
-    # fire on a half-typed address
+    # Matches only complete video/shorts/playlist/reel/post URLs so
+    # auto-fetch doesn't fire on a half-typed address
     AUTO_FETCH_RE = re.compile(
         r'(youtube\.com/watch\?\S*v=[\w-]{11}'
         r'|youtu\.be/[\w-]{11}'
         r'|youtube\.com/shorts/[\w-]{11}'
-        r'|youtube\.com/playlist\?\S*list=[\w-]+)'
+        r'|youtube\.com/playlist\?\S*list=[\w-]+'
+        # instagram.com/reel/CODE, /reels/, /p/, /tv/ - with or without a
+        # leading /username/ path segment (share links include one)
+        r'|instagram\.com/(?:[\w.]+/)?(?:reels?|p|tv)/[\w-]+'
+        # threads.net|.com/@username/post/CODE
+        r'|threads\.(?:net|com)/@?[\w.]+/post/[\w-]+)',
+        re.IGNORECASE
     )
 
     def _schedule_auto_fetch(self, *_):
@@ -540,20 +634,21 @@ class YouTubeDownloader:
     def prepare_download(self):
         url = self.url_var.get().strip()
         if not url:
-            messagebox.showerror("Error", "Please enter a YouTube URL")
+            messagebox.showerror("Error", "Please enter a video URL")
             return
 
-        # Validate YouTube URL format
-        if not ('youtube.com' in url or 'youtu.be' in url):
-            messagebox.showerror("Error", "Invalid YouTube URL format")
+        if not SUPPORTED_URL_RE.search(url):
+            messagebox.showerror(
+                "Error",
+                "Unsupported URL.\n\nSupported sites: YouTube, Instagram, Threads")
             return
 
         # Remember what we fetched so the auto-fetch trace doesn't fire a
         # second search for the same URL
         self._last_fetched_url = url
 
-        # Clean up playlist URL if present
-        if 'playlist' in url:
+        # Clean up playlist URL if present (YouTube only)
+        if 'youtube' in url and 'playlist' in url:
             try:
                 # Extract the playlist ID
                 if 'list=' in url:
@@ -561,6 +656,16 @@ class YouTubeDownloader:
                     url = f"https://youtube.com/playlist?list={playlist_id}"
             except Exception as e:
                 logger.error(f"Error formatting playlist URL: {str(e)}")
+
+        # Auto download: no format fetch, no picker - yt-dlp resolves the
+        # configured quality preset itself at download time
+        if self.settings.get("auto_download"):
+            quality = self.settings.get("auto_download_quality", "best")
+            self.status_var.set(f"Auto-downloading ({quality} quality)...")
+            self.start_download(
+                url, auto_quality=quality,
+                is_playlist='youtube' in url and 'playlist' in url)
+            return
 
         if url in self.format_cache:
             self.show_format_selector(self.format_cache[url], url)
@@ -570,58 +675,73 @@ class YouTubeDownloader:
 
     def fetch_formats(self, url):
         try:
-            with yt_dlp.YoutubeDL(dict(BASE_YDL_OPTS)) as ydl:
-                info = ydl.extract_info(url, download=False)
+            info = run_with_cookie_fallback(
+                site_ydl_opts(url, self.settings),
+                lambda ydl: ydl.extract_info(url, download=False))
 
-                # Check if URL is a playlist
-                is_playlist = 'entries' in info
-                self.root.after(0, self.is_playlist.set, is_playlist)
-                if is_playlist:
-                    self.playlist_info = info
-                    # For playlists, use the first video's formats
-                    formats = info['entries'][0]['formats'] if info['entries'] else []
+            # Check if URL is a playlist
+            is_playlist = 'entries' in info
+            self.root.after(0, self.is_playlist.set, is_playlist)
+            if is_playlist:
+                self.playlist_info = info
+                # For playlists, use the first video's formats
+                formats = info['entries'][0]['formats'] if info['entries'] else []
 
-                    # Update status with playlist info
-                    playlist_count = len(info['entries'])
-                    self.root.after(0, self.status_var.set, f"Playlist detected: {playlist_count} videos")
-                else:
-                    self.playlist_info = None
-                    formats = info['formats']
+                # Update status with playlist info
+                playlist_count = len(info['entries'])
+                self.root.after(0, self.status_var.set, f"Playlist detected: {playlist_count} videos")
+            else:
+                self.playlist_info = None
+                formats = info['formats']
 
-                # Filter and sort formats based on download type
-                download_type = self.download_type.get()
-                if download_type == "video+audio":
-                    # List every video format, not just files that already
-                    # contain audio - YouTube only serves those at low
-                    # resolution. Audio is merged in at download time.
-                    formats = [f for f in formats if
-                        f.get('vcodec') != 'none' and
-                        f.get('ext') in ['mp4', 'mkv', 'webm']
-                    ]
-                    formats.sort(key=lambda x: (
-                        int(x.get('height', 0) or 0),
-                        float(x.get('tbr', 0) or 0)
-                    ), reverse=True)
-                elif download_type == "video-only":
-                    formats = [f for f in formats if 
-                        f.get('vcodec') != 'none' and
-                        f.get('acodec') == 'none' and
-                        f.get('ext') in ['mp4', 'webm']
-                    ]
-                    formats.sort(key=lambda x: int(x.get('height', 0) or 0), reverse=True)
-                else:  # audio-only
-                    formats = [f for f in formats if 
-                        f.get('acodec') != 'none' and
-                        f.get('vcodec') == 'none' and
-                        f.get('ext') in ['m4a', 'mp3', 'opus', 'webm']
-                    ]
-                    formats.sort(key=lambda x: float(x.get('abr', 0) or 0), reverse=True)
+            # Filter and sort formats based on download type
+            download_type = self.download_type.get()
+            all_formats = formats
+            if download_type == "video+audio":
+                # List every video format, not just files that already
+                # contain audio - YouTube only serves those at low
+                # resolution. Audio is merged in at download time.
+                formats = [f for f in formats if
+                    f.get('vcodec') != 'none' and
+                    f.get('ext') in ['mp4', 'mkv', 'webm']
+                ]
+                if not formats:
+                    # Other sites (Instagram/Threads) may use containers
+                    # not in the list above - accept any video stream
+                    formats = [f for f in all_formats if f.get('vcodec') != 'none']
+                formats.sort(key=lambda x: (
+                    int(x.get('height', 0) or 0),
+                    float(x.get('tbr', 0) or 0)
+                ), reverse=True)
+            elif download_type == "video-only":
+                formats = [f for f in formats if
+                    f.get('vcodec') != 'none' and
+                    f.get('acodec') == 'none' and
+                    f.get('ext') in ['mp4', 'webm']
+                ]
+                formats.sort(key=lambda x: int(x.get('height', 0) or 0), reverse=True)
+            else:  # audio-only
+                formats = [f for f in formats if
+                    f.get('acodec') != 'none' and
+                    f.get('vcodec') == 'none' and
+                    f.get('ext') in ['m4a', 'mp3', 'opus', 'webm']
+                ]
+                formats.sort(key=lambda x: float(x.get('abr', 0) or 0), reverse=True)
+                if not formats:
+                    # Instagram/Threads usually have no separate audio
+                    # streams; offer combined files (acodec may be
+                    # unknown/None there) - the MP3 extraction step
+                    # strips the video at download time
+                    formats = [f for f in all_formats if
+                               f.get('acodec') != 'none']
+                    formats.sort(key=lambda x: float(
+                        x.get('abr', 0) or x.get('tbr', 0) or 0), reverse=True)
 
-                # Cache the formats
-                self.format_cache[url] = formats
+            # Cache the formats
+            self.format_cache[url] = formats
 
-                # Show format selector
-                self.root.after(0, lambda: self.show_format_selector(formats, url))
+            # Show format selector
+            self.root.after(0, lambda: self.show_format_selector(formats, url))
 
         except Exception as e:
             error_msg = str(e)
@@ -637,17 +757,26 @@ class YouTubeDownloader:
         else:
             self.status_var.set("Download cancelled")
 
-    def start_download(self, url, format_id):
-        format_id = str(format_id)
+    def start_download(self, url, format_id=None, auto_quality=None, is_playlist=None):
+        """Download url.
+
+        Either format_id (a concrete format chosen in the picker) or
+        auto_quality ('best'/'medium'/'low', resolved by yt-dlp via
+        QUALITY_FORMATS) must be given. is_playlist=None means "use the
+        state discovered by fetch_formats"; auto downloads skip that fetch,
+        so they pass an explicit URL-based value instead.
+        """
+        format_id = str(format_id) if format_id is not None else None
         download_type = self.download_type.get()
-        is_playlist = self.is_playlist.get() and self.playlist_info
+        if is_playlist is None:
+            is_playlist = self.is_playlist.get() and self.playlist_info
 
         # Only prefix filenames with the playlist index for playlist downloads;
         # for single videos %(playlist_index)s expands to "NA"
         outtmpl = '%(playlist_index)s-%(title)s.%(ext)s' if is_playlist else '%(title)s.%(ext)s'
 
         ydl_opts = {
-            **BASE_YDL_OPTS,
+            **site_ydl_opts(url, self.settings),
             'outtmpl': outtmpl,
             'paths': build_download_paths(self.settings),
             'progress_hooks': [self.download_progress_hook],
@@ -687,7 +816,21 @@ class YouTubeDownloader:
             ydl_opts['noplaylist'] = False
             ydl_opts['playlist_reverse'] = self.reverse_playlist.get()
 
-        if download_type == "video+audio":
+        if auto_quality is not None:
+            type_presets = QUALITY_FORMATS[download_type]
+            format_expr, format_sort = type_presets.get(
+                auto_quality, type_presets['best'])
+            ydl_opts['format'] = format_expr
+            if format_sort:
+                ydl_opts['format_sort'] = format_sort
+            if download_type == "video+audio":
+                ydl_opts['merge_output_format'] = self.settings['format']
+            elif download_type == "audio-only":
+                ydl_opts['postprocessors'] = [{
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': 'mp3',
+                }]
+        elif download_type == "video+audio":
             # Merge the chosen video with the best audio; fall back to the
             # bare format (progressive files already contain audio)
             ydl_opts.update({
@@ -696,7 +839,7 @@ class YouTubeDownloader:
             })
         elif download_type == "video-only":
             ydl_opts['format'] = format_id
-        else:  
+        else:
             ydl_opts.update({
                 'format': format_id,
                 'postprocessors': [{
@@ -706,27 +849,28 @@ class YouTubeDownloader:
             })
 
         playlist_suffix = " (Playlist)" if is_playlist else ""
+        format_desc = f'auto-{auto_quality}' if auto_quality else format_id
 
         def download_thread():
             try:
                 self.root.after(0, self.status_var.set, "Downloading..." + playlist_suffix)
-                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                    error_code = ydl.download([url])
-                    if error_code != 0:
-                        # Only reachable with ignoreerrors (playlists): some
-                        # entries failed but the rest were downloaded
-                        raise Exception("Some playlist entries could not be downloaded "
-                                        "(see download history for details)")
+                error_code = run_with_cookie_fallback(
+                    ydl_opts, lambda ydl: ydl.download([url]))
+                if error_code != 0:
+                    # Only reachable with ignoreerrors (playlists): some
+                    # entries failed but the rest were downloaded
+                    raise Exception("Some playlist entries could not be downloaded "
+                                    "(see download history for details)")
 
                 self.root.after(0, self.status_var.set, "Download completed!")
                 self.root.after(0, self.progress_var.set, 100)
-                self.log_download(url, f"{download_type}:{format_id}", "Success" + playlist_suffix)
+                self.log_download(url, f"{download_type}:{format_desc}", "Success" + playlist_suffix)
                 self.root.after(0, lambda: messagebox.showinfo("Success", "Download completed!"))
             except Exception as e:
                 # yt-dlp errors read "ERROR: <reason>"; show just the reason
                 error_msg = re.sub(r'^\s*ERROR:\s*', '', str(e))
                 self.root.after(0, self.status_var.set, "Download failed!")
-                self.log_download(url, f"{download_type}:{format_id}", f"Failed: {error_msg}")
+                self.log_download(url, f"{download_type}:{format_desc}", f"Failed: {error_msg}")
                 self.root.after(0, lambda: messagebox.showerror("Error", f"Download failed: {error_msg}"))
             finally:
                 self.root.after(0, self.progress_var.set, 0)
@@ -747,7 +891,8 @@ class YouTubeDownloader:
     def load_settings(self):
         return load_settings(self.base_path)
 
-    def save_settings(self, source_var, dest_var, type_var, format_var, settings_window):
+    def save_settings(self, source_var, dest_var, type_var, format_var,
+                      cookies_var, auto_var, quality_var, settings_window):
         source = source_var.get().strip()
         dest = dest_var.get().strip()
         if not os.path.isdir(dest):
@@ -761,6 +906,9 @@ class YouTubeDownloader:
         self.settings["download_path"] = dest
         self.settings["default_download_type"] = type_var.get()
         self.settings["format"] = format_var.get()
+        self.settings["cookies_browser"] = cookies_var.get().strip()
+        self.settings["auto_download"] = bool(auto_var.get())
+        self.settings["auto_download_quality"] = quality_var.get()
         self.save_settings_file()
         # Apply the new default to the main window immediately
         self.download_type.set(type_var.get())
@@ -775,7 +923,7 @@ class YouTubeDownloader:
     def check_clipboard(self):
         try:
             clipboard_content = pyperclip.paste()
-            if "youtube.com" in clipboard_content or "youtu.be" in clipboard_content:
+            if SUPPORTED_URL_RE.search(clipboard_content or ""):
                 self.url_var.set(clipboard_content)
         except:
             pass
@@ -783,7 +931,7 @@ class YouTubeDownloader:
     def show_settings(self):
         settings_window = tk.Toplevel(self.root)
         settings_window.title("Settings")
-        settings_window.geometry("520x230")
+        settings_window.geometry("520x300")
         settings_window.resizable(False, False)
 
         settings_frame = ttk.Frame(settings_window, padding="10")
@@ -825,11 +973,45 @@ class YouTubeDownloader:
 
         self.add_context_menu(format_entry)
 
+        # Instagram/Threads mostly require a login; picking a browser here
+        # lets yt-dlp reuse that browser's session cookies
+        cookies_frame = ttk.Frame(settings_frame)
+        cookies_frame.pack(fill=tk.X, pady=3)
+        ttk.Label(cookies_frame, text="Instagram/Threads login:", width=22).pack(side=tk.LEFT)
+        cookies_var = tk.StringVar(value=self.settings.get("cookies_browser", ""))
+        ttk.Combobox(cookies_frame, textvariable=cookies_var, width=10,
+                     state="readonly",
+                     values=("", "chrome", "edge", "firefox", "brave",
+                             "opera", "vivaldi")).pack(side=tk.LEFT, padx=5)
+        ttk.Label(cookies_frame,
+                  text="browser to reuse cookies from").pack(side=tk.LEFT)
+
+        # Auto download: skip the format picker and start downloading at a
+        # preset quality as soon as a URL is entered/pasted
+        auto_frame = ttk.Frame(settings_frame)
+        auto_frame.pack(fill=tk.X, pady=3)
+        ttk.Label(auto_frame, text="Auto download:", width=22).pack(side=tk.LEFT)
+        auto_var = tk.BooleanVar(value=bool(self.settings.get("auto_download")))
+        quality_var = tk.StringVar(
+            value=self.settings.get("auto_download_quality", "best"))
+        quality_box = ttk.Combobox(auto_frame, textvariable=quality_var, width=8,
+                                   state="readonly", values=("best", "medium", "low"))
+
+        def sync_quality_state(*_):
+            quality_box.configure(state="readonly" if auto_var.get() else "disabled")
+
+        ttk.Checkbutton(auto_frame, text="on, at quality:", variable=auto_var,
+                        command=sync_quality_state).pack(side=tk.LEFT, padx=5)
+        quality_box.pack(side=tk.LEFT, padx=5)
+        sync_quality_state()
+
         save_frame = ttk.Frame(settings_frame)
         save_frame.pack(fill=tk.X, pady=10)
         ttk.Button(save_frame, text="Save",
                    command=lambda: self.save_settings(source_var, dest_var, type_var,
-                                                      format_var, settings_window)).pack()
+                                                      format_var, cookies_var,
+                                                      auto_var, quality_var,
+                                                      settings_window)).pack()
 
     def browse_path(self, path_var):
         path = filedialog.askdirectory(
@@ -897,57 +1079,40 @@ def api_download():
         logger.debug(f"Download settings: {settings}")
 
         download_type = settings.get('downloadType', 'video-audio')
-        if download_type == 'video+audio':  # popup uses this spelling
-            download_type = 'video-audio'
+        if download_type == 'video-audio':  # extension uses this spelling
+            download_type = 'video+audio'
+        # Extension quality names -> QUALITY_FORMATS keys
         quality = settings.get('quality', 'highest')
+        quality = {'highest': 'best', 'lowest': 'low'}.get(quality, quality)
 
-        # Format selection expressions: yt-dlp resolves these itself, so the
-        # request doesn't pay for a metadata extraction, and video-audio gets
-        # full-resolution video merged with the best audio instead of being
-        # capped at YouTube's low-resolution progressive files
-        format_map = {
-            'video-audio': {
-                'highest': 'bestvideo+bestaudio/best',
-                'medium': 'bestvideo[height<=720]+bestaudio/best[height<=720]/best',
-                'lowest': 'worstvideo+worstaudio/worst',
-            },
-            'video-only': {
-                'highest': 'bestvideo',
-                'medium': 'bestvideo[height<=720]/bestvideo',
-                'lowest': 'worstvideo',
-            },
-            'audio-only': {
-                'highest': 'bestaudio',
-                'medium': 'bestaudio[abr<=128]/bestaudio',
-                'lowest': 'worstaudio',
-            },
-        }
-        type_formats = format_map.get(download_type)
-        if type_formats is None:
+        type_presets = QUALITY_FORMATS.get(download_type)
+        if type_presets is None:
             return jsonify({
                 'success': False,
                 'error': f'Unknown download type: {download_type}'
             }), 400
-        selected_format = type_formats.get(quality, type_formats['highest'])
-        logger.info(f"Selected format expression: {selected_format}")
+        selected_format, format_sort = type_presets.get(quality, type_presets['best'])
+        logger.info(f"Selected format expression: {selected_format} sort: {format_sort}")
 
         # Honor the folders and merge format configured in the desktop
         # app's Settings
         app_settings = load_settings(get_base_path())
         ydl_opts = {
-            **BASE_YDL_OPTS,
+            **site_ydl_opts(video_url, app_settings),
             'format': selected_format,
             'outtmpl': '%(title)s.%(ext)s',
             'paths': build_download_paths(app_settings),
             'merge_output_format': app_settings['format'],
             'concurrent_fragment_downloads': 4,
         }
+        if format_sort:
+            ydl_opts['format_sort'] = format_sort
 
         # Start download in background thread
         def download_thread():
             try:
-                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                    ydl.download([video_url])
+                run_with_cookie_fallback(
+                    ydl_opts, lambda ydl: ydl.download([video_url]))
                 logger.info("Download completed successfully")
             except Exception as e:
                 logger.error(f"Download failed: {str(e)}")

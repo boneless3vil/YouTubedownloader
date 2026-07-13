@@ -40,7 +40,7 @@ def build_executable():
     # Ensure we're in the correct directory
     if not os.path.exists("youtube_downloader.py"):
         print("Error: youtube_downloader.py not found in current directory")
-        print("Please run this script from the python_youtube_downloader directory")
+        print("Please run this script from the repository root")
         sys.exit(1)
 
     # Create default settings if it doesn't exist
@@ -96,6 +96,9 @@ if os.name == 'nt':  # Windows-specific initialization
         '--name=YouTubeDownloader',
         '--windowed',  # Windows GUI mode
         '--add-data=settings.json;.',  # Windows path separator
+        # yt-dlp plugin package with the Threads extractor; unpacked into
+        # sys._MEIPASS (which is on sys.path) so yt-dlp discovers it
+        '--add-data=yt_dlp_plugins;yt_dlp_plugins',
         '--hidden-import=tkinter',
         '--hidden-import=tkinter.ttk',
         '--hidden-import=_tkinter',

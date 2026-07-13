@@ -96,10 +96,19 @@ function notifyTab(tabId, action, message) {
 // Must match API_PORT in youtube_downloader.py and manifest host_permissions
 const API_URL = 'http://localhost:47811/api/download';
 
+// Pages the desktop app can download from (keep in sync with
+// SUPPORTED_URL_RE / AUTO_FETCH_RE in youtube_downloader.py)
+const VIDEO_PAGE_RE = new RegExp(
+  'youtube\\.com/(watch|shorts/)' +
+  '|youtu\\.be/' +
+  '|instagram\\.com/([\\w.]+/)?(reels?|p|tv)/' +
+  '|threads\\.(net|com)/@?[\\w.]+/post/', 'i');
+
 async function startDownload(url, tabId) {
-  if (!url || !url.includes('youtube.com/watch')) {
-    flashBadge('!', '#f0ad4e', 'Open a YouTube video page first');
-    return { success: false, error: 'Not a YouTube video page' };
+  if (!url || !VIDEO_PAGE_RE.test(url)) {
+    flashBadge('!', '#f0ad4e',
+      'Open a YouTube, Instagram, or Threads video page first');
+    return { success: false, error: 'Not a supported video page' };
   }
   try {
     const preferences = await getPreferences();

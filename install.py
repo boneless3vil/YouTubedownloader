@@ -23,7 +23,7 @@ IS_WINDOWS = os.name == "nt"
 VENV_BIN = os.path.join(VENV_DIR, "Scripts" if IS_WINDOWS else "bin")
 VENV_PYTHON = os.path.join(VENV_BIN, "python.exe" if IS_WINDOWS else "python")
 RUNTIME_PACKAGES = ["yt-dlp", "pyperclip", "flask", "flask-cors"]
-EXTENSION_DIR = os.path.join(os.path.dirname(SCRIPT_DIR), "chrome_extension")
+EXTENSION_DIR = os.path.join(SCRIPT_DIR, "chrome_extension")
 
 
 def ask_yes_no(question, default=True):
