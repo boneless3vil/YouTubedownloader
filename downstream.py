@@ -20,6 +20,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+APP_NAME = "Downstream"
+APP_VERSION = "1.6.3"
+
 def get_base_path():
     """Get base path for resources, works both in development and when packaged"""
     try:
@@ -147,6 +150,12 @@ SUPPORTED_URL_RE = re.compile(
     re.IGNORECASE)
 
 META_URL_RE = re.compile(r'(instagram\.com|threads\.(?:net|com))', re.IGNORECASE)
+
+# Matches the error our Threads extractor plugin raises for cross-posts
+# (posts whose video is actually hosted on another site, e.g. an Instagram
+# reel shared to Threads). The phrasing is fixed in threads.py.
+CROSSPOST_ERROR_RE = re.compile(
+    r'Download it from the source instead - (?P<source>[^:]+): (?P<url>https?://\S+)')
 
 
 def site_ydl_opts(url, settings):
@@ -292,12 +301,12 @@ class FormatSelector(tk.Toplevel):
         self.selected_format = str(values[0])
         self.destroy()
 
-class YouTubeDownloader:
+class DownstreamApp:
     def __init__(self, root):
         try:
-            logger.debug("Initializing YouTube Downloader GUI")
+            logger.debug("Initializing Downstream GUI")
             self.root = root
-            self.root.title("YouTube Downloader")
+            self.root.title(f"{APP_NAME} v{APP_VERSION}")
 
             # Initialize variables
             self.format_cache = {}
@@ -616,8 +625,19 @@ class YouTubeDownloader:
         self.progress_bar.pack(fill=tk.X)
 
         self.status_var = tk.StringVar(value="Ready")
-        status_label = ttk.Label(progress_frame, textvariable=self.status_var)
-        status_label.pack(anchor=tk.W, pady=(2, 0))  
+        self.status_label = ttk.Label(progress_frame, textvariable=self.status_var)
+        self.status_label.pack(anchor=tk.W, pady=(2, 0))
+
+    def flash_status(self, flashes=3, interval=250):
+        """Flash the status label red the given number of times, then
+        restore the theme's default text color."""
+        def step(i):
+            if i >= flashes * 2:
+                self.status_label.configure(foreground='')
+                return
+            self.status_label.configure(foreground='red' if i % 2 == 0 else 'black')
+            self.root.after(interval, step, i + 1)
+        step(0)
 
     def add_context_menu(self, entry):
         menu = tk.Menu(entry, tearoff=0)
@@ -745,8 +765,33 @@ class YouTubeDownloader:
 
         except Exception as e:
             error_msg = str(e)
-            self.root.after(0, lambda: messagebox.showerror("Error", f"Failed to fetch formats: {error_msg}"))
-            self.root.after(0, self.status_var.set, "Ready")
+            crosspost = CROSSPOST_ERROR_RE.search(error_msg)
+            if crosspost:
+                self.root.after(0, self.show_crosspost_warning,
+                                crosspost.group('source'), crosspost.group('url'))
+            else:
+                self.root.after(0, lambda: messagebox.showerror("Error", f"Failed to fetch formats: {error_msg}"))
+                self.root.after(0, self.status_var.set, "Ready")
+
+    def show_crosspost_warning(self, source, source_url):
+        """The Threads post has no video of its own - it's cross-posted from
+        another site. Say where the video actually lives and, when the app
+        supports that site, offer to download from there right away."""
+        self.status_var.set(f"Cross-post - video is on {source}")
+        if SUPPORTED_URL_RE.search(source_url):
+            if messagebox.askyesno(
+                    "Cross-posted video",
+                    "This Threads post is a cross-post - the video is "
+                    f"actually hosted on {source}:\n\n{source_url}\n\n"
+                    f"Download it from {source} now?"):
+                self.url_var.set(source_url)
+                self.prepare_download()
+        else:
+            messagebox.showwarning(
+                "Cross-posted video",
+                "This Threads post is a cross-post - the video is actually "
+                f"hosted on {source}. Download it from the source "
+                f"instead:\n\n{source_url}")
 
     def show_format_selector(self, formats, url):
         selector = FormatSelector(self.root, formats,
@@ -863,15 +908,20 @@ class YouTubeDownloader:
                                     "(see download history for details)")
 
                 self.root.after(0, self.status_var.set, "Download completed!")
+                self.root.after(0, self.flash_status)
                 self.root.after(0, self.progress_var.set, 100)
                 self.log_download(url, f"{download_type}:{format_desc}", "Success" + playlist_suffix)
-                self.root.after(0, lambda: messagebox.showinfo("Success", "Download completed!"))
             except Exception as e:
                 # yt-dlp errors read "ERROR: <reason>"; show just the reason
                 error_msg = re.sub(r'^\s*ERROR:\s*', '', str(e))
-                self.root.after(0, self.status_var.set, "Download failed!")
                 self.log_download(url, f"{download_type}:{format_desc}", f"Failed: {error_msg}")
-                self.root.after(0, lambda: messagebox.showerror("Error", f"Download failed: {error_msg}"))
+                crosspost = CROSSPOST_ERROR_RE.search(error_msg)
+                if crosspost:
+                    self.root.after(0, self.show_crosspost_warning,
+                                    crosspost.group('source'), crosspost.group('url'))
+                else:
+                    self.root.after(0, self.status_var.set, "Download failed!")
+                    self.root.after(0, lambda: messagebox.showerror("Error", f"Download failed: {error_msg}"))
             finally:
                 self.root.after(0, self.progress_var.set, 0)
 
@@ -1059,7 +1109,7 @@ CORS(flask_app)  # Enable CORS for Chrome extension
 def index():
     return jsonify({
         'status': 'running',
-        'message': 'YouTube Downloader API is active'
+        'message': 'Downstream API is active'
     })
 
 @flask_app.route('/api/download', methods=['POST'])
@@ -1143,7 +1193,7 @@ def run_flask():
             exc_info=True)
 
 def main():
-    logger.info("Starting YouTube Downloader application")
+    logger.info("Starting Downstream application")
     if os.name == 'nt':
         # Give the process its own taskbar identity; otherwise Windows groups
         # the window under pythonw.exe and shows the Python/Tk icon instead
@@ -1151,7 +1201,7 @@ def main():
         try:
             import ctypes
             ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
-                "Boneless3vil.YouTubeDownloader")
+                "Boneless3vil.Downstream")
         except Exception:
             logger.warning("Could not set AppUserModelID", exc_info=True)
     try:
@@ -1194,8 +1244,8 @@ def main():
                 print("FATAL ERROR:", error_msg)
             sys.exit(1)
 
-        app = YouTubeDownloader(root)
-        logger.debug("Created YouTubeDownloader instance")
+        app = DownstreamApp(root)
+        logger.debug("Created DownstreamApp instance")
         logger.info("Starting main event loop")
         root.mainloop()
 

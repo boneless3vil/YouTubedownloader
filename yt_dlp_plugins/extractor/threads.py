@@ -19,6 +19,7 @@ packaged exe it's bundled via build.py).
 """
 
 import json
+import re
 
 from yt_dlp.extractor.common import InfoExtractor
 from yt_dlp.utils import (
@@ -31,6 +32,30 @@ from yt_dlp.utils.traversal import traverse_obj
 # Instagram/Threads shortcode alphabet: a shortcode is the media's numeric
 # ID in base64url
 _SHORTCODE_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_'
+
+# Friendly names for the sites cross-posts commonly point at, keyed by the
+# second-to-last domain label (instagram.com -> instagram, youtu.be -> youtu)
+_LINK_SOURCE_NAMES = {
+    'instagram': 'Instagram',
+    'facebook': 'Facebook',
+    'fb': 'Facebook',
+    'youtube': 'YouTube',
+    'youtu': 'YouTube',
+    'tiktok': 'TikTok',
+    'twitter': 'X (Twitter)',
+    'x': 'X (Twitter)',
+}
+
+
+def _link_source_name(url):
+    """Human-readable site name for a shared link, e.g. 'Instagram'."""
+    m = re.match(r'https?://(?:www\.)?([^/:?#]+)', url or '')
+    if not m:
+        return 'the original site'
+    domain = m.group(1).lower()
+    labels = domain.split('.')
+    key = labels[-2] if len(labels) >= 2 else labels[0]
+    return _LINK_SOURCE_NAMES.get(key, domain)
 
 
 class ThreadsIE(InfoExtractor):
@@ -121,6 +146,7 @@ class ThreadsIE(InfoExtractor):
         formats = []
         thumbnails = []
         metadata = {'id': video_id}
+        linked_url = None
 
         # The response carries the whole thread (post + replies); pick our post
         for node in traverse_obj(response, ('data', 'data', 'edges')) or []:
@@ -129,6 +155,12 @@ class ThreadsIE(InfoExtractor):
                 if not post or (str(post.get('pk')) != pk
                                 and post.get('code') != video_id):
                     continue
+
+                # Cross-posts / link-share posts (media_type 19) have no
+                # media of their own; the video lives behind the shared link
+                # (commonly an Instagram reel)
+                linked_url = traverse_obj(post, (
+                    'text_post_app_info', 'link_preview_attachment', 'url'))
 
                 # Carousel posts carry several media items; plain posts are
                 # their own single media item
@@ -171,6 +203,17 @@ class ThreadsIE(InfoExtractor):
                     metadata.setdefault('description', caption)
 
         if not formats:
+            if linked_url:
+                # Don't silently follow the link: extraction on the target
+                # site fails often (logins, rate limits) with errors that
+                # never mention this was a cross-post. Surface the real
+                # location instead; the GUI parses this exact phrasing
+                # (CROSSPOST_ERROR_RE in downstream.py) to offer a retry.
+                raise ExtractorError(
+                    'This Threads post is a cross-post with no video hosted '
+                    'on Threads. Download it from the source instead - '
+                    f'{_link_source_name(linked_url)}: {linked_url}',
+                    expected=True)
             self.raise_no_formats(
                 'No video found in this Threads post. It may be image/text-only, '
                 'deleted, or visible only when logged in - if you are logged in '
