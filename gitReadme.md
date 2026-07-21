@@ -1,4 +1,4 @@
-# Security Guidelines for YouTube Downloader
+# Security Guidelines for Downstream
 
 ## Credential Management
 

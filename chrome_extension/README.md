@@ -1,4 +1,4 @@
-# YouTube Easy Downloader - Chrome Extension
+# Downstream - Chrome Extension
 
 A convenient Chrome extension that adds one-click video download capabilities to YouTube pages with preconfigured quality settings.
 

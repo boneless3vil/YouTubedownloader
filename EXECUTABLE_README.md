@@ -1,6 +1,6 @@
-# YouTube Downloader - Windows Executable
+# Downstream - Windows Executable
 
-A user-friendly YouTube video downloader with a graphical interface, packaged as a Windows executable.
+A user-friendly video downloader (YouTube, Instagram, Threads) with a graphical interface, packaged as a Windows executable.
 
 ## System Requirements
 
@@ -19,10 +19,10 @@ The following components must be installed before running the executable:
 
 ## Installation
 
-1. Download `YouTubeDownloader.exe` from the `dist` folder
+1. Download `Downstream.exe` from the `dist` folder
 2. Place the executable in a directory path without spaces
-   - Good example: `C:\Programs\YouTubeDownloader`
-   - Bad example: `C:\Program Files\YouTube Downloader`
+   - Good example: `C:\Programs\Downstream`
+   - Bad example: `C:\Program Files\Downstream`
 3. First time setup:
    - If Windows SmartScreen appears, click "More info" then "Run anyway"
    - You may need to temporarily disable antivirus software for the first run
@@ -30,7 +30,7 @@ The following components must be installed before running the executable:
 ## Usage
 
 1. Launch the application:
-   - Double-click `YouTubeDownloader.exe`
+   - Double-click `Downstream.exe`
 
 2. Basic Video Download:
    - Paste a YouTube URL

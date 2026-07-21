@@ -1,4 +1,4 @@
-# Enhanced YouTube Downloader
+# Downstream
 
 A feature-rich video downloader with a graphical user interface that allows you to download videos in your preferred quality and format.
 
@@ -31,7 +31,7 @@ A feature-rich video downloader with a graphical user interface that allows you 
 
 ```
 .
-├── youtube_downloader.py   # Desktop app (Tkinter GUI + local API server)
+├── downstream.py           # Desktop app (Tkinter GUI + local API server)
 ├── install.py              # Interactive installer
 ├── build.py                # PyInstaller build script (Windows exe)
 ├── yt_dlp_plugins/         # Bundled yt-dlp extractor plugin for Threads
@@ -63,7 +63,7 @@ It walks you through everything needed at runtime:
 2. Creates a virtual environment (`.venv`) and installs the Python packages into it
 3. Checks for ffmpeg and Deno, and offers to install them (via winget on Windows)
 4. Asks where downloads should be saved (writes `settings.json`)
-5. Creates `YouTubeDownloader.bat` and an optional desktop shortcut (Windows)
+5. Creates `Downstream.bat` and an optional desktop shortcut (Windows)
 6. Optionally helps you install the Chrome extension
 
 Every prompt has a sensible default — pressing Enter through the installer gives a working setup.
@@ -84,9 +84,9 @@ Then install ffmpeg (and ideally Deno) with your system's package manager.
 
 ## Usage
 
-1. Start the application — double-click `YouTubeDownloader.bat` (Windows), or run:
+1. Start the application — double-click `Downstream.bat` (Windows), or run:
 ```bash
-.venv\Scripts\python youtube_downloader.py
+.venv\Scripts\python downstream.py
 ```
 
 2. Basic Video Download:

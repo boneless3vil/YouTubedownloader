@@ -1,4 +1,4 @@
-# Installing the YouTube Easy Downloader Chrome Extension
+# Installing the Downstream Chrome Extension
 
 ## Installation Steps
 
@@ -53,8 +53,8 @@
 ## Requirements
 
 - The desktop application must be installed and running. The extension's
-  server is **built into the desktop app** — starting `youtube_downloader.py`
-  (or `YouTubeDownloader.bat`) also starts the API the extension talks to
+  server is **built into the desktop app** — starting `downstream.py`
+  (or `Downstream.bat`) also starts the API the extension talks to
   at `http://localhost:47811`. There is nothing separate to install or run.
 - To install the desktop app, run `python install.py` in the repository
   root — the installer can also open this extension setup for you.

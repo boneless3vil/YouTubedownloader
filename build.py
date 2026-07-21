@@ -35,11 +35,11 @@ def build_executable():
         print("Please upgrade your Python installation.")
         sys.exit(1)
 
-    print("\nPreparing to build YouTube Downloader for Windows...")
+    print("\nPreparing to build Downstream for Windows...")
 
     # Ensure we're in the correct directory
-    if not os.path.exists("youtube_downloader.py"):
-        print("Error: youtube_downloader.py not found in current directory")
+    if not os.path.exists("downstream.py"):
+        print("Error: downstream.py not found in current directory")
         print("Please run this script from the repository root")
         sys.exit(1)
 
@@ -91,9 +91,9 @@ if os.name == 'nt':  # Windows-specific initialization
 
     # Windows-specific PyInstaller options
     options = [
-        'youtube_downloader.py',
+        'downstream.py',
         '--onefile',
-        '--name=YouTubeDownloader',
+        '--name=Downstream',
         '--windowed',  # Windows GUI mode
         '--add-data=settings.json;.',  # Windows path separator
         # yt-dlp plugin package with the Threads extractor; unpacked into
@@ -122,7 +122,7 @@ if os.name == 'nt':  # Windows-specific initialization
         PyInstaller.__main__.run(options)
 
         # Verify the Windows executable was created
-        exe_path = os.path.join('dist', 'YouTubeDownloader.exe')
+        exe_path = os.path.join('dist', 'Downstream.exe')
 
         if os.path.exists(exe_path):
             print(f"\nBuild completed successfully!")

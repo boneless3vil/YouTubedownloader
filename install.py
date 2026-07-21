@@ -1,4 +1,4 @@
-"""Interactive installer for YouTube Downloader.
+"""Interactive installer for Downstream.
 
 Sets up everything needed to RUN the application:
   - a virtual environment with the Python dependencies
@@ -142,21 +142,21 @@ def step_settings():
 def step_launcher():
     if not IS_WINDOWS:
         print("\nTo run the application:")
-        print(f"  {VENV_PYTHON} {os.path.join(SCRIPT_DIR, 'youtube_downloader.py')}")
+        print(f"  {VENV_PYTHON} {os.path.join(SCRIPT_DIR, 'downstream.py')}")
         return
 
-    launcher = os.path.join(SCRIPT_DIR, "YouTubeDownloader.bat")
+    launcher = os.path.join(SCRIPT_DIR, "Downstream.bat")
     with open(launcher, "w") as f:
         f.write('@echo off\r\n'
                 'start "" "%~dp0.venv\\Scripts\\pythonw.exe" '
-                '"%~dp0youtube_downloader.py"\r\n')
+                '"%~dp0downstream.py"\r\n')
     print(f"[ok] Launcher created: {launcher}")
 
     if ask_yes_no("Create a desktop shortcut?"):
         shortcut_cmd = (
             "$ws = New-Object -ComObject WScript.Shell; "
             "$s = $ws.CreateShortcut([Environment]::GetFolderPath('Desktop') "
-            "+ '\\YouTube Downloader.lnk'); "
+            "+ '\\Downstream.lnk'); "
             f"$s.TargetPath = '{launcher}'; "
             f"$s.WorkingDirectory = '{SCRIPT_DIR}'; "
             "$s.Save()"
@@ -197,7 +197,7 @@ def step_chrome_extension():
 
 
 def main():
-    print("=== YouTube Downloader - interactive setup ===\n")
+    print("=== Downstream - interactive setup ===\n")
     step_python_version()
     step_virtual_environment()
     step_ffmpeg()
@@ -208,7 +208,7 @@ def main():
 
     print("\n=== Setup complete ===")
     if IS_WINDOWS:
-        print('Run the app with "YouTubeDownloader.bat" (or the desktop shortcut).')
+        print('Run the app with "Downstream.bat" (or the desktop shortcut).')
     print("The Chrome extension works whenever the desktop app is running.")
 
 

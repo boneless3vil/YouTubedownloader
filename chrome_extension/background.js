@@ -80,10 +80,10 @@ chrome.contextMenus.onClicked.addListener((info) => {
 function flashBadge(text, color, title) {
   chrome.action.setBadgeBackgroundColor({ color });
   chrome.action.setBadgeText({ text });
-  chrome.action.setTitle({ title: title || 'YouTube Easy Downloader' });
+  chrome.action.setTitle({ title: title || 'Downstream' });
   setTimeout(() => {
     chrome.action.setBadgeText({ text: '' });
-    chrome.action.setTitle({ title: 'YouTube Easy Downloader' });
+    chrome.action.setTitle({ title: 'Downstream' });
   }, 4000);
 }
 
@@ -93,11 +93,11 @@ function notifyTab(tabId, action, message) {
   chrome.tabs.sendMessage(tabId, { action, message }).catch(() => {});
 }
 
-// Must match API_PORT in youtube_downloader.py and manifest host_permissions
+// Must match API_PORT in downstream.py and manifest host_permissions
 const API_URL = 'http://localhost:47811/api/download';
 
 // Pages the desktop app can download from (keep in sync with
-// SUPPORTED_URL_RE / AUTO_FETCH_RE in youtube_downloader.py)
+// SUPPORTED_URL_RE / AUTO_FETCH_RE in downstream.py)
 const VIDEO_PAGE_RE = new RegExp(
   'youtube\\.com/(watch|shorts/)' +
   '|youtu\\.be/' +
@@ -133,7 +133,7 @@ async function startDownload(url, tabId) {
   } catch (error) {
     // "Failed to fetch" = nothing listening on the API port
     const hint = String(error.message).includes('Failed to fetch')
-      ? 'Desktop app is not running - start YouTube Downloader first'
+      ? 'Desktop app is not running - start Downstream first'
       : error.message;
     flashBadge('✗', '#c62828', 'Download failed: ' + hint);
     notifyTab(tabId, 'downloadError', hint);

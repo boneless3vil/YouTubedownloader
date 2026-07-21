@@ -1,7 +1,7 @@
 [project]
-name = "youtube-downloader"
+name = "downstream"
 version = "1.0.0"
-description = "Desktop YouTube downloader (Tkinter GUI + local API for the Chrome extension)"
+description = "Downstream - desktop video downloader for YouTube, Instagram, and Threads (Tkinter GUI + local API for the Chrome extension)"
 requires-python = ">=3.11"
 dependencies = [
     "yt-dlp>=2025.2.19",

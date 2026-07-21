@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "YouTube Easy Downloader",
-  "version": "1.0",
-  "description": "Download YouTube videos with one click",
+  "name": "Downstream",
+  "version": "1.1",
+  "description": "Send YouTube, Instagram, and Threads videos to Downstream with one click",
   "permissions": [
     "contextMenus",
     "activeTab",
